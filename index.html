@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f6f5f1" />
+    <title>湲곕줉寃?| 援먭낵 ?명듅 ?뚰겕?ㅽ럹?댁뒪</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand"><span class="brand-mark">湲곕줉</span><span>寃?/span></div>
+        <p class="side-kicker">TEACHER WORKSPACE</p>
+        <nav>
+          <button class="nav-item active" data-view="write"><span>??/span> ??珥덉븞 留뚮뱾湲?/button>
+          <button class="nav-item" data-view="history"><span>??/span> ????댁뿭</button>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="agent-mini"><span class="live-dot"></span><div><b>3 agents online</b><small>?섏쭛 쨌 ?묒꽦 쨌 寃??/small></div></div>
+          <button class="profile-button" data-view="settings"><span class="avatar">源</span><div><b>源?좎깮??/b><small>媛쒖씤 硫붾돱</small></div><span class="chevron">??/span></button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar"><div class="crumb">2026?숇뀈??<span>/</span> ?명듅 ?뚰겕?ㅽ럹?댁뒪</div><div class="top-actions"><span class="save-status"><i></i> ?먮룞 ??λ맖</span><button class="icon-button" aria-label="?뚮┝">??/button></div></header>
+
+        <section id="write-view" class="view active-view">
+          <div class="hero-row"><div><p class="eyebrow">NEW RECORD <span>01</span></p><h1>?숈깮??諛곗???br/><em>?뺥솗?섍쾶 湲곕줉?섏꽭??</em></h1><p class="hero-copy">?쒕룞 ?ㅼ썙?쒕? ?낅젰?섎㈃ ??紐낆쓽 AI ?먯씠?꾪듃媛<br/>愿李?媛?ν븳 ?됰룞 以묒떖???명듅 珥덉븞???④퍡 留뚮벊?덈떎.</p></div><div class="hero-note"><span class="note-line"></span><p>?낅젰???ъ떎??踰쀬뼱?섏? ?딄퀬<br/>援먯궗??愿李?湲곕줉 臾몄껜濡??묒꽦?⑸땲??</p></div></div>
+
+          <div class="workflow"><div class="workflow-label">WORKFLOW</div><div class="step active"><span>01</span><b>?뺣━</b><small>?섏쭛 ?먯씠?꾪듃</small></div><div class="flow-line"></div><div class="step"><span>02</span><b>?묒꽦</b><small>?묒꽦 ?먯씠?꾪듃</small></div><div class="flow-line"></div><div class="step"><span>03</span><b>寃??/b><small>寃???먯씠?꾪듃</small></div></div>
+
+          <form id="record-form">
+            <div class="form-card"><div class="card-head"><div><span class="section-number">01</span><h2>湲곕낯 ?뺣낫</h2></div><span class="required">* ?꾩닔 ?낅젰</span></div><div class="form-grid three"><label>?숈깮 ?앸퀎媛?<span class="optional">?좏깮</span><input id="studentId" placeholder="?? 20417" /></label><label>?숇뀈 <span class="required-star">*</span><select id="grade"><option value="1">1?숇뀈</option><option value="2" selected>2?숇뀈</option><option value="3">3?숇뀈</option></select></label><label>怨쇰ぉ <span class="required-star">*</span><select id="subject"><option>?앸챸怨쇳븰</option><option>?뷀븰</option><option>臾쇰━??/option><option>?섑븰</option><option>援?뼱</option><option>?곸뼱</option><option>?ы쉶臾명솕</option><option>?뺣낫</option></select></label></div></div>
+            <div class="form-card"><div class="card-head"><div><span class="section-number">02</span><h2>?숈깮 ?쒕룞 ?낅젰</h2></div><span class="hint">愿李?媛?ν븳 ?됰룞??以묒떖?쇰줈 ?곸뼱二쇱꽭??</span></div><label>?쒕룞 ?ㅼ썙??<span class="required-star">*</span><div class="tag-input"><div id="tags" class="tags"></div><input id="keywordInput" placeholder="?ㅼ썙?쒕? ?낅젰?섍퀬 Enter濡?異붽?" /></div><div class="suggestions"><button type="button" data-tag="?먭뎄 ?ㅺ퀎">+ ?먭뎄 ?ㅺ퀎</button><button type="button" data-tag="?먮즺 遺꾩꽍">+ ?먮즺 遺꾩꽍</button><button type="button" data-tag="臾몄젣 ?닿껐">+ 臾몄젣 ?닿껐</button><button type="button" data-tag="?묒뾽">+ ?묒뾽</button></div></label><div class="form-grid two"><label>?쒕룞紐?<span class="required-star">*</span><input id="activityTitle" placeholder="?? ?⑥냼???⑤룄???곕Ⅸ 諛섏쓳 ?띾룄 ?먭뎄" /></label><label>?쒕룞 ?좏삎 <span class="required-star">*</span><select id="activityType"><option>?먭뎄</option><option>?ㅽ뿕</option><option>?좊줎</option><option>諛쒗몴</option><option>?꾨줈?앺듃</option><option>?낆꽌</option><option>?묒뾽</option></select></label></div><label>援먯궗 愿李?諛??쒕룞 ?댁슜 <span class="required-star">*</span><textarea id="observation" rows="5" placeholder="?숈깮??臾댁뾿???덈뒗吏, ?대뼡 怨쇱젙??嫄곗낀?붿? 援ъ껜?곸쑝濡??곸뼱二쇱꽭??\n?? ?ㅽ뿕 議곌굔???듭젣?섍퀬 諛섎났 痢≪젙?? ?덉긽怨??ㅻⅨ 寃곌낵媛 ?섑????ㅼ감 ?먯씤????媛吏濡?遺꾨쪟?섍퀬 ?ъ떎??議곌굔??吏곸젒 ?쒖븞??"></textarea><div class="textarea-meta"><span>?ъ떎??洹쇨굅???쒖닠????醫뗭? 寃곌낵瑜?留뚮벊?덈떎.</span><span id="charCount">0??/span></div></label><div class="form-grid two"><label>?곗텧臾??먮뒗 寃곌낵 <span class="optional">?좏깮</span><textarea id="result" rows="3" placeholder="蹂닿퀬?? 諛쒗몴, 諛쒓껄??寃곌낵 ??></textarea></label><label>?대젮?怨??닿껐 怨쇱젙 <span class="optional">?좏깮</span><textarea id="resolution" rows="3" placeholder="臾몄젣 ?곹솴怨??섏젙쨌蹂댁셿??怨쇱젙"></textarea></label></div></div>
+            <div class="form-footer"><p><span class="sparkle">??/span> ?낅젰 ?댁슜? ?명듅 珥덉븞 ?앹꽦?먮쭔 ?ъ슜?⑸땲??</p><button class="primary-button" type="submit">?명듅 珥덉븞 留뚮뱾湲?<span>??/span></button></div>
+          </form>
+        </section>
+
+        <section id="result-view" class="view"><div class="result-top"><div><p class="eyebrow">DRAFT READY <span>03</span></p><h1>怨쇰ぉ蹂?珥덉븞??br/><em>?꾩꽦?섏뿀?듬땲??</em></h1></div><div class="result-actions"><button class="secondary-button" id="downloadBtn">???띿뒪???ㅼ슫濡쒕뱶</button><button class="primary-button" id="saveBtn">Supabase?????<span>??/span></button></div></div><div class="result-summary"><div class="summary-label">?숈깮 ?앸퀎媛?<b id="resultStudent">??/b></div><div class="summary-label">?숇뀈 <b id="resultGrade">??/b></div><div class="summary-label">怨쇰ぉ <b id="resultSubject">??/b></div><div class="summary-label">?앹꽦?쇱떆 <b id="resultDate">??/b></div></div><div class="agent-log" id="agentLog"></div><div class="draft-card"><div class="draft-head"><div><span class="status-pill">寃???꾨즺</span><h2 id="draftSubject">?앸챸怨쇳븰</h2></div><button class="copy-button" id="copyBtn">??蹂듭궗</button></div><p id="draftText"></p><div class="review-note"><span>??/span><div><b>寃???먯씠?꾪듃???뺤씤</b><p id="reviewText">湲덉??댁? ?쒖쐞 ?쒗쁽???뺤씤?섍퀬, 愿李?媛?ν븳 ?됰룞 以묒떖?쇰줈 ?ㅻ벉?덉뒿?덈떎.</p></div></div></div><button class="back-link" id="backBtn">????珥덉븞 留뚮뱾湲?/button></section>
+
+        <section id="history-view" class="view"><div class="page-heading"><p class="eyebrow">ARCHIVE <span>02</span></p><h1>????댁뿭</h1><p>?꾩꽦???명듅 珥덉븞???ㅼ떆 ?뺤씤?섍퀬 ?대젮諛쏆쓣 ???덉뒿?덈떎.</p></div><div class="history-toolbar"><div class="search-box">??<input id="searchInput" placeholder="?숈깮 ?앸퀎媛??먮뒗 怨쇰ぉ 寃?? /></div><span id="historyCount">3媛?湲곕줉</span></div><div id="historyList" class="history-list"></div></section>
+
+        <section id="settings-view" class="view"><div class="page-heading"><p class="eyebrow">PERSONAL MENU</p><h1>媛쒖씤 硫붾돱</h1><p>AI ?곌껐 ?뺣낫? 湲곕낯 ?앹꽦 ?섍꼍??愿由ы빀?덈떎.</p></div><div class="settings-card"><div class="card-head"><div><span class="section-number">01</span><h2>Gemini ?곌껐</h2></div><span class="connection-badge" id="connectionBadge">?곕え 紐⑤뱶</span></div><label>Gemini API Key <input id="apiKey" type="password" placeholder="AIza..." /></label><p class="field-help">?ㅻ뒗 ??釉뚮씪?곗??먮쭔 ??λ릺硫? ?ㅼ젣 ?쒕퉬?ㅼ뿉?쒕뒗 ?쒕쾭 ?섍꼍蹂???ъ슜??沅뚯옣?⑸땲??</p><label>?좏샇 紐⑤뜽<select id="modelSelect"><option>Gemini 3.5 Flash-Lite</option><option>Gemini 3.5 Flash</option><option>Gemini 3.5 Pro</option></select></label><button class="primary-button" id="settingsSave">?ㅼ젙 ???<span>??/span></button></div><div class="settings-card agent-settings"><div class="card-head"><div><span class="section-number">02</span><h2>?먯씠?꾪듃 ?</h2></div></div><div class="team-row"><span class="team-icon blue">01</span><div><b>?섏쭛 ?먯씠?꾪듃</b><small>?ㅼ썙?????쒕룞쨌洹쇨굅쨌??웾 援ъ“??/small></div><span class="team-live">?ъ슜 以?/span></div><div class="team-row"><span class="team-icon orange">02</span><div><b>?묒꽦 ?먯씠?꾪듃</b><small>援먯궗 愿李?湲곕줉 臾몄껜濡?珥덉븞 ?묒꽦</small></div><span class="team-live">?ъ슜 以?/span></div><div class="team-row"><span class="team-icon green">03</span><div><b>寃???먯씠?꾪듃</b><small>湲덉??는룹닚?꽷룰낵???쒗쁽 ?먭?</small></div><span class="team-live">?ъ슜 以?/span></div></div></section>
+      </main>
+    </div>
+    <div id="toast" class="toast"></div>
+    <script src="./supabase-config.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
+
