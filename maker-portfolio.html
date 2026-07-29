@@ -1,0 +1,1669 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1565d8" />
+  <meta name="description" content="중학교 기술 프로젝트 수업을 위한 메이커 포트폴리오" />
+  <title>Makerlog — 메이커 포트폴리오</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0&family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --primary: #1565d8;
+      --primary-strong: #0b4fb3;
+      --primary-soft: #eaf2ff;
+      --mint: #16a384;
+      --ink: #162033;
+      --muted: #68758a;
+      --surface: #ffffff;
+      --surface-2: #f5f7fb;
+      --surface-3: #edf1f7;
+      --border: #dfe5ef;
+      --danger: #d94141;
+      --warning: #b86b00;
+      --shadow: 0 12px 38px rgba(32, 56, 85, .09);
+      --radius: 22px;
+      --radius-sm: 14px;
+      --header-h: 72px;
+    }
+    [data-theme="dark"] {
+      --primary: #73a8ff;
+      --primary-strong: #9cc0ff;
+      --primary-soft: #172c4d;
+      --mint: #58d6b6;
+      --ink: #edf3ff;
+      --muted: #9ba8bc;
+      --surface: #111927;
+      --surface-2: #0b111c;
+      --surface-3: #1b2535;
+      --border: #2a3547;
+      --danger: #ff7b7b;
+      --warning: #ffc069;
+      --shadow: 0 16px 42px rgba(0, 0, 0, .24);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 2%, rgba(21, 101, 216, .10), transparent 30rem),
+        var(--surface-2);
+      font-family: Pretendard, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+    button, input, select, textarea { font: inherit; }
+    button, .clickable { -webkit-tap-highlight-color: transparent; }
+    button { border: 0; cursor: pointer; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible,
+    a:focus-visible { outline: 3px solid rgba(21, 101, 216, .26); outline-offset: 2px; }
+    .material-symbols-rounded { font-size: 21px; line-height: 1; vertical-align: -4px; }
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      height: var(--header-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 0 max(20px, env(safe-area-inset-left));
+      background: color-mix(in srgb, var(--surface) 88%, transparent);
+      border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+      backdrop-filter: blur(18px);
+    }
+    .brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
+    .brand-mark {
+      width: 40px; height: 40px; border-radius: 13px;
+      display: grid; place-items: center;
+      color: white;
+      background: linear-gradient(145deg, #2381f7, #0d51ba);
+      box-shadow: 0 7px 18px rgba(21, 101, 216, .25);
+    }
+    .brand-mark .material-symbols-rounded { font-size: 25px; }
+    .brand-copy { min-width: 0; }
+    .brand-copy strong { display: block; font-size: 16px; letter-spacing: -.3px; }
+    .brand-copy small { display: block; color: var(--muted); font-size: 11px; margin-top: -2px; }
+    .header-actions { display: flex; gap: 7px; }
+    .icon-btn {
+      width: 42px; height: 42px; border-radius: 50%;
+      display: grid; place-items: center;
+      color: var(--ink); background: transparent;
+    }
+    .icon-btn:hover { background: var(--surface-3); }
+    .config-panel {
+      position: fixed;
+      z-index: 60;
+      top: calc(var(--header-h) + 10px);
+      right: 18px;
+      width: min(430px, calc(100vw - 28px));
+      max-height: calc(100vh - var(--header-h) - 24px);
+      overflow: auto;
+      padding: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      transform-origin: top right;
+      transition: .2s ease;
+    }
+    .config-panel[hidden] { display: block; opacity: 0; visibility: hidden; transform: scale(.96) translateY(-8px); }
+    .panel-head, .section-head, .modal-head {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
+    }
+    .panel-head h2, .section-head h2, .modal-head h2 { margin: 0; font-size: 19px; letter-spacing: -.35px; }
+    .panel-head p, .section-head p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    .config-grid { display: grid; gap: 13px; margin-top: 18px; }
+    .status-line { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); margin-top: 11px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+    .status-dot.ok { background: #22ad7b; box-shadow: 0 0 0 4px rgba(34, 173, 123, .12); }
+    .shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 26px 0 70px; }
+    .intro {
+      display: flex; justify-content: space-between; align-items: center; gap: 24px;
+      margin-bottom: 20px; padding: 18px 4px 4px;
+    }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--primary-strong); font-size: 12px; font-weight: 800; letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .intro h1 { margin: 7px 0 5px; font-size: clamp(26px, 4vw, 40px); line-height: 1.18; letter-spacing: -1.4px; }
+    .intro p { margin: 0; color: var(--muted); }
+    .mode-switch {
+      display: flex; gap: 4px; padding: 5px;
+      background: var(--surface-3); border-radius: 16px; flex: 0 0 auto;
+    }
+    .mode-btn {
+      min-width: 110px; padding: 10px 16px; border-radius: 12px;
+      color: var(--muted); background: transparent; font-weight: 700;
+    }
+    .mode-btn.active { color: var(--primary-strong); background: var(--surface); box-shadow: 0 2px 8px rgba(20, 40, 70, .08); }
+    .view[hidden], .hidden { display: none !important; }
+    .grid { display: grid; gap: 18px; }
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: clamp(18px, 3vw, 28px);
+    }
+    .card.flat { box-shadow: none; }
+    .project-banner {
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: space-between; gap: 20px;
+      color: white; background: linear-gradient(125deg, #0f5acb, #2386ed);
+      border: 0;
+    }
+    .project-banner::after {
+      content: ""; position: absolute; right: -50px; top: -90px;
+      width: 240px; height: 240px; border-radius: 50%; background: rgba(255,255,255,.09);
+    }
+    .project-banner > * { position: relative; z-index: 1; }
+    .project-banner .label { opacity: .78; font-size: 12px; font-weight: 700; }
+    .project-banner h2 { margin: 3px 0 2px; font-size: clamp(22px, 4vw, 30px); }
+    .project-banner p { margin: 0; opacity: .86; }
+    .lesson-chip {
+      display: grid; place-items: center; min-width: 78px; min-height: 68px; padding: 8px 14px;
+      background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.25); border-radius: 18px;
+      font-size: 23px; font-weight: 800; backdrop-filter: blur(8px);
+    }
+    .lesson-chip small { display: block; font-size: 11px; font-weight: 600; opacity: .78; }
+    .empty-project { text-align: center; padding-block: 46px; }
+    .empty-project .big-icon {
+      width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 20px;
+      display: grid; place-items: center; color: var(--primary); background: var(--primary-soft);
+    }
+    .empty-project .big-icon .material-symbols-rounded { font-size: 31px; }
+    .empty-project h2 { margin: 0; font-size: 20px; }
+    .empty-project p { margin: 6px auto 0; color: var(--muted); max-width: 400px; }
+    .form-section { margin-top: 18px; }
+    .section-kicker { color: var(--primary-strong); font-size: 12px; font-weight: 800; margin-bottom: 10px; }
+    .form-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 15px; }
+    .field { grid-column: span 12; min-width: 0; }
+    .field.half { grid-column: span 6; }
+    .field.third { grid-column: span 4; }
+    .field label { display: block; margin: 0 0 7px 2px; font-size: 13px; font-weight: 700; }
+    .req { color: var(--danger); }
+    .control {
+      width: 100%; min-height: 48px; padding: 12px 14px;
+      color: var(--ink); background: var(--surface-2);
+      border: 1px solid var(--border); border-radius: 13px;
+      transition: border .15s, box-shadow .15s, background .15s;
+    }
+    textarea.control { min-height: 116px; resize: vertical; }
+    .control:focus { border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 4px rgba(21, 101, 216, .10); outline: none; }
+    .control.invalid { border-color: var(--danger); }
+    .hint { color: var(--muted); font-size: 11px; margin: 5px 2px 0; }
+    .photo-drop {
+      min-height: 150px; border: 1.5px dashed #9fb1c9; border-radius: 17px;
+      display: grid; place-items: center; text-align: center; padding: 12px;
+      color: var(--muted); background: var(--surface-2); cursor: pointer; overflow: hidden;
+    }
+    .photo-drop:hover { border-color: var(--primary); background: var(--primary-soft); }
+    .photo-drop img { max-width: 100%; max-height: 220px; border-radius: 12px; object-fit: cover; }
+    .photo-drop .material-symbols-rounded { display: block; margin-bottom: 6px; font-size: 30px; color: var(--primary); }
+    .actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 21px; }
+    .btn {
+      min-height: 45px; padding: 10px 17px; border-radius: 13px;
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      font-weight: 750; text-decoration: none; transition: transform .15s, filter .15s, background .15s;
+    }
+    .btn:hover { filter: brightness(.97); transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn.primary { color: white; background: var(--primary); }
+    [data-theme="dark"] .btn.primary { color: #071222; }
+    .btn.secondary { color: var(--primary-strong); background: var(--primary-soft); }
+    .btn.ghost { color: var(--ink); background: var(--surface-3); }
+    .btn.danger { color: var(--danger); background: color-mix(in srgb, var(--danger) 11%, transparent); }
+    .btn.small { min-height: 37px; padding: 7px 11px; border-radius: 11px; font-size: 12px; }
+    .btn:disabled { cursor: not-allowed; opacity: .54; transform: none; }
+    .ai-flow {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 18px 0 2px;
+    }
+    .agent-step {
+      position: relative; padding: 14px 13px 13px 39px;
+      border: 1px solid var(--border); border-radius: 14px; background: var(--surface-2);
+      color: var(--muted); font-size: 12px;
+    }
+    .agent-step strong { display: block; color: var(--ink); font-size: 13px; }
+    .agent-dot {
+      position: absolute; left: 14px; top: 17px; width: 12px; height: 12px;
+      border-radius: 50%; background: #b6c0ce;
+    }
+    .agent-step.running { color: var(--primary-strong); border-color: color-mix(in srgb, var(--primary) 55%, var(--border)); background: var(--primary-soft); }
+    .agent-step.running .agent-dot { background: #20b778; box-shadow: 0 0 0 5px rgba(32,183,120,.13); animation: pulse 1.2s infinite; }
+    .agent-step.done .agent-dot { background: #20b778; }
+    @keyframes pulse { 50% { box-shadow: 0 0 0 9px rgba(32,183,120,0); } }
+    .agent-live {
+      display: flex; align-items: center; gap: 8px; min-height: 27px; margin-top: 10px;
+      color: var(--primary-strong); font-size: 13px; font-weight: 700;
+    }
+    .spinner {
+      width: 17px; height: 17px; border: 2px solid color-mix(in srgb, var(--primary) 20%, transparent);
+      border-top-color: var(--primary); border-radius: 50%; animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .record-list { display: grid; gap: 10px; margin-top: 16px; }
+    .record-item {
+      display: grid; grid-template-columns: auto 1fr auto; gap: 13px; align-items: center;
+      padding: 13px; border: 1px solid var(--border); border-radius: 15px; background: var(--surface-2);
+    }
+    .record-thumb { width: 54px; height: 54px; object-fit: cover; border-radius: 12px; background: var(--surface-3); }
+    .record-placeholder { display: grid; place-items: center; color: var(--muted); }
+    .record-copy { min-width: 0; }
+    .record-copy strong { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .record-copy small { color: var(--muted); }
+    .auth-wrap { max-width: 520px; margin: 0 auto; }
+    .auth-symbol {
+      width: 56px; height: 56px; border-radius: 18px; display: grid; place-items: center;
+      color: var(--primary); background: var(--primary-soft); margin-bottom: 15px;
+    }
+    .auth-symbol .material-symbols-rounded { font-size: 28px; }
+    .auth-wrap h2 { margin: 0 0 5px; }
+    .auth-wrap > p { margin: 0 0 20px; color: var(--muted); }
+    .dashboard-bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 18px; }
+    .dashboard-bar h2 { margin: 0; font-size: 22px; }
+    .dashboard-bar p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+    .stat { padding: 17px; background: var(--surface); border: 1px solid var(--border); border-radius: 17px; }
+    .stat span { color: var(--muted); font-size: 12px; }
+    .stat strong { display: block; font-size: 25px; letter-spacing: -.5px; margin-top: 3px; }
+    .project-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; margin-top: 16px; }
+    .project-card { border: 1px solid var(--border); background: var(--surface-2); border-radius: 17px; padding: 16px; }
+    .project-card.active { border-color: var(--primary); box-shadow: inset 0 0 0 1px var(--primary); }
+    .project-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .project-card h3 { margin: 0 0 3px; font-size: 16px; }
+    .project-card p { margin: 0; color: var(--muted); font-size: 12px; }
+    .project-card .actions { justify-content: flex-start; margin-top: 13px; gap: 7px; }
+    .chip { display: inline-flex; padding: 5px 9px; border-radius: 999px; color: var(--primary-strong); background: var(--primary-soft); font-size: 11px; font-weight: 750; }
+    .toolbar {
+      display: flex; flex-wrap: wrap; gap: 9px; margin: 16px 0;
+    }
+    .toolbar .control { width: auto; flex: 1 1 150px; min-height: 42px; padding-block: 9px; }
+    .table-wrap { overflow: auto; border: 1px solid var(--border); border-radius: 16px; }
+    table { width: 100%; border-collapse: collapse; min-width: 830px; font-size: 12px; }
+    th, td { padding: 12px 13px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { position: sticky; top: 0; z-index: 1; color: var(--muted); background: var(--surface-3); font-size: 11px; }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: var(--surface-2); }
+    .table-photo { width: 42px; height: 42px; border-radius: 9px; object-fit: cover; }
+    .cell-text { max-width: 210px; max-height: 58px; overflow: hidden; }
+    .empty-state { text-align: center; color: var(--muted); padding: 34px 16px; }
+    dialog {
+      width: min(760px, calc(100% - 28px)); max-height: min(88vh, 900px); padding: 0;
+      color: var(--ink); background: var(--surface); border: 1px solid var(--border);
+      border-radius: 22px; box-shadow: 0 24px 80px rgba(0,0,0,.32);
+    }
+    dialog::backdrop { background: rgba(4, 12, 26, .62); backdrop-filter: blur(4px); }
+    .modal-head { position: sticky; top: 0; z-index: 3; padding: 20px 22px; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .modal-body { padding: 21px 22px; overflow: auto; }
+    .modal-foot {
+      position: sticky; bottom: 0; display: flex; justify-content: flex-end; gap: 9px;
+      padding: 15px 22px; background: var(--surface); border-top: 1px solid var(--border);
+    }
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .compare-col { min-width: 0; }
+    .compare-col > strong { display: block; margin-bottom: 9px; font-size: 13px; }
+    .compare-block { padding: 12px; margin-bottom: 9px; border-radius: 13px; background: var(--surface-2); border: 1px solid var(--border); }
+    .compare-block label { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .compare-block p { margin: 4px 0 0; white-space: pre-wrap; font-size: 13px; }
+    .setup-tabs { display: flex; gap: 7px; margin-bottom: 15px; }
+    .setup-tab { padding: 8px 12px; border-radius: 10px; color: var(--muted); background: var(--surface-3); font-weight: 700; font-size: 12px; }
+    .setup-tab.active { color: var(--primary-strong); background: var(--primary-soft); }
+    .guide { font-size: 14px; }
+    .guide h3 { margin: 21px 0 7px; }
+    .guide h3:first-child { margin-top: 0; }
+    .guide ol, .guide ul { padding-left: 22px; }
+    pre {
+      max-height: 430px; overflow: auto; padding: 15px; border-radius: 14px;
+      color: #dce8ff; background: #101827; font: 12px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace;
+      white-space: pre; tab-size: 2;
+    }
+    .toast-stack { position: fixed; z-index: 100; right: 18px; bottom: 18px; display: grid; gap: 9px; pointer-events: none; }
+    .toast {
+      max-width: min(380px, calc(100vw - 36px)); display: flex; align-items: flex-start; gap: 9px;
+      padding: 13px 15px; color: white; background: #182235; border-radius: 13px;
+      box-shadow: 0 10px 32px rgba(0,0,0,.25); animation: toastIn .2s ease;
+    }
+    .toast.success { background: #08785e; }
+    .toast.error { background: #a62e35; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } }
+    .loading-overlay {
+      position: fixed; inset: 0; z-index: 90; display: grid; place-items: center;
+      background: rgba(5,12,24,.54); backdrop-filter: blur(3px);
+    }
+    .loading-box { display: flex; align-items: center; gap: 12px; padding: 18px 21px; color: var(--ink); background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); font-weight: 700; }
+    .footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 26px; }
+    .footer button { color: var(--primary-strong); background: transparent; font-weight: 700; }
+    @media (max-width: 760px) {
+      :root { --header-h: 64px; --radius: 18px; }
+      .app-header { padding-inline: 14px; }
+      .brand-copy small { display: none; }
+      .shell { width: min(100% - 22px, 1180px); padding-top: 16px; }
+      .intro { display: block; padding-top: 7px; }
+      .intro p { font-size: 13px; }
+      .mode-switch { margin-top: 17px; }
+      .mode-btn { flex: 1; min-width: 0; }
+      .grid.two, .project-list { grid-template-columns: 1fr; }
+      .field.half, .field.third { grid-column: span 12; }
+      .ai-flow { grid-template-columns: 1fr; }
+      .agent-step { padding-block: 11px; }
+      .agent-dot { top: 14px; }
+      .stats { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+      .stat { padding: 13px 10px; }
+      .stat strong { font-size: 20px; }
+      .stat span { font-size: 10px; }
+      .dashboard-bar { align-items: flex-start; }
+      .dashboard-bar .actions { margin: 0; }
+      .compare-grid { grid-template-columns: 1fr; }
+      .compare-col:first-child { opacity: .8; }
+      .modal-body { padding: 17px; }
+      .modal-head, .modal-foot { padding-inline: 17px; }
+      .actions .btn { flex: 1 1 auto; }
+      .project-banner { align-items: flex-start; }
+      .lesson-chip { min-width: 68px; }
+      .record-item { grid-template-columns: auto 1fr; }
+      .record-item > .actions { grid-column: 1 / -1; margin: 0; }
+    }
+    @media print {
+      body * { visibility: hidden; }
+      #qrPrintArea, #qrPrintArea * { visibility: visible; }
+      #qrPrintArea { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; background: white; color: black; }
+      #qrPrintArea canvas { width: 280px !important; height: 280px !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-mark"><span class="material-symbols-rounded">architecture</span></div>
+      <div class="brand-copy"><strong>Makerlog</strong><small>기술 수업 메이커 포트폴리오</small></div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="themeBtn" aria-label="다크 모드 전환" title="테마 전환"><span class="material-symbols-rounded">dark_mode</span></button>
+      <button class="icon-btn" id="setupBtn" aria-label="설치 안내 열기" title="설치 안내"><span class="material-symbols-rounded">help</span></button>
+      <button class="icon-btn" id="configBtn" aria-label="연결 설정 열기" title="연결 설정"><span class="material-symbols-rounded">tune</span></button>
+    </div>
+  </header>
+
+  <aside class="config-panel" id="configPanel" hidden aria-label="연결 설정">
+    <div class="panel-head">
+      <div><h2>연결 설정</h2><p>이 기기에만 안전하게 저장됩니다.</p></div>
+      <button class="icon-btn" id="configCloseBtn" aria-label="닫기"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    <div class="config-grid">
+      <div class="field">
+        <label for="geminiKey">Gemini API Key</label>
+        <input class="control" id="geminiKey" type="password" autocomplete="off" placeholder="AI 다듬기를 사용할 때만 필요" />
+      </div>
+      <div class="field">
+        <label for="geminiModel">Gemini 모델</label>
+        <select class="control" id="geminiModel">
+          <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (기본)</option>
+          <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+          <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+          <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="supabaseUrl">Supabase URL</label>
+        <input class="control" id="supabaseUrl" type="url" autocomplete="off" placeholder="https://xxxxx.supabase.co" />
+      </div>
+      <div class="field">
+        <label for="supabaseKey">Supabase Anon Key</label>
+        <input class="control" id="supabaseKey" type="password" autocomplete="off" placeholder="eyJ..." />
+      </div>
+      <button class="btn primary" id="saveConfigBtn"><span class="material-symbols-rounded">save</span>설정 저장 및 연결</button>
+      <div class="status-line"><span class="status-dot" id="connectionDot"></span><span id="connectionText">연결 정보가 필요합니다.</span></div>
+    </div>
+  </aside>
+
+  <main class="shell">
+    <section class="intro">
+      <div>
+        <span class="eyebrow"><span class="material-symbols-rounded">handyman</span> Make · Reflect · Grow</span>
+        <h1>오늘의 만들기를 기록해요.</h1>
+        <p>작은 시도와 해결의 순간이 나만의 포트폴리오가 됩니다.</p>
+      </div>
+      <nav class="mode-switch" aria-label="사용자 모드">
+        <button class="mode-btn active" data-mode="student"><span class="material-symbols-rounded">school</span> 학생</button>
+        <button class="mode-btn" data-mode="teacher"><span class="material-symbols-rounded">co_present</span> 교사</button>
+      </nav>
+    </section>
+
+    <section class="view" id="studentView">
+      <div id="studentNoProject" class="card empty-project">
+        <div class="big-icon"><span class="material-symbols-rounded">qr_code_scanner</span></div>
+        <h2>프로젝트 QR을 스캔해 주세요</h2>
+        <p>교사가 공유한 QR코드로 접속하면 프로젝트명과 차시가 자동으로 표시됩니다.</p>
+      </div>
+
+      <div id="studentWorkspace" class="hidden">
+        <div class="card project-banner">
+          <div>
+            <div class="label">현재 프로젝트</div>
+            <h2 id="studentProjectName">프로젝트</h2>
+            <p id="studentProjectMeta">학년 · 반</p>
+          </div>
+          <div class="lesson-chip"><span id="studentLesson">1</span><small>차시</small></div>
+        </div>
+
+        <div class="grid two form-section">
+          <section class="card">
+            <div class="section-head">
+              <div><h2>나의 정보</h2><p>이전 기록을 찾을 때도 사용해요.</p></div>
+            </div>
+            <div class="form-grid" style="margin-top:16px">
+              <div class="field half"><label for="studentNumber">학번 <span class="req">*</span></label><input class="control" id="studentNumber" inputmode="numeric" maxlength="20" placeholder="예: 20301" /></div>
+              <div class="field half"><label for="studentName">이름 <span class="req">*</span></label><input class="control" id="studentName" maxlength="30" placeholder="이름" /></div>
+              <div class="field"><button class="btn secondary" id="loadHistoryBtn" style="width:100%"><span class="material-symbols-rounded">history</span>내 이전 기록 보기</button></div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="section-head">
+              <div><h2>이전 기록</h2><p id="historyCount">학번과 이름을 입력해 주세요.</p></div>
+            </div>
+            <div class="record-list" id="studentHistory">
+              <div class="empty-state">아직 불러온 기록이 없어요.</div>
+            </div>
+          </section>
+        </div>
+
+        <section class="card form-section" id="portfolioFormCard">
+          <div class="section-head">
+            <div><h2 id="formTitle">오늘의 활동 기록</h2><p>내가 직접 쓴 내용 그대로 저장할 수 있어요.</p></div>
+            <span class="chip" id="editBadge" hidden>기록 수정 중</span>
+          </div>
+          <form id="portfolioForm" novalidate>
+            <div class="form-grid" style="margin-top:19px">
+              <div class="field half">
+                <label for="activityDate">활동 날짜 <span class="req">*</span></label>
+                <input class="control" id="activityDate" type="date" required />
+              </div>
+              <div class="field half">
+                <label>활동 사진 <span class="req">*</span></label>
+                <label class="photo-drop" id="photoDrop" for="photoInput">
+                  <span id="photoPrompt"><span class="material-symbols-rounded">add_photo_alternate</span>사진 1장을 선택하세요<small style="display:block">JPG, PNG · 최대 10MB</small></span>
+                  <img id="photoPreview" alt="선택한 활동 사진 미리보기" hidden />
+                </label>
+                <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden />
+              </div>
+              <div class="field">
+                <label for="activityTitle">활동 제목 <span class="req">*</span></label>
+                <input class="control" id="activityTitle" maxlength="100" required placeholder="오늘 활동을 한 문장으로 표현해 보세요" />
+              </div>
+              <div class="field half">
+                <label for="todayWork">오늘 한 일 <span class="req">*</span></label>
+                <textarea class="control" id="todayWork" maxlength="2000" required placeholder="어떤 재료와 도구로 무엇을 했나요?"></textarea>
+              </div>
+              <div class="field half">
+                <label for="difficulties">어려웠던 점 <span class="req">*</span></label>
+                <textarea class="control" id="difficulties" maxlength="2000" required placeholder="막히거나 예상과 달랐던 점은 무엇인가요?"></textarea>
+              </div>
+              <div class="field">
+                <label for="solutions">해결한 점 <span class="req">*</span></label>
+                <textarea class="control" id="solutions" maxlength="2000" required placeholder="어떻게 해결했나요? 아직 해결하지 못했다면 다음에 시도할 방법을 적어 보세요."></textarea>
+              </div>
+            </div>
+            <div class="ai-flow" id="aiFlow" aria-label="AI 에이전트 진행 상태">
+              <div class="agent-step" data-agent="collect"><span class="agent-dot"></span><strong>① 수집 에이전트</strong>필수 내용 확인</div>
+              <div class="agent-step" data-agent="write"><span class="agent-dot"></span><strong>② 작성 에이전트</strong>문장만 자연스럽게</div>
+              <div class="agent-step" data-agent="review"><span class="agent-dot"></span><strong>③ 검토 에이전트</strong>맞춤법·흐름 검토</div>
+            </div>
+            <div class="agent-live" id="agentLive" aria-live="polite"></div>
+            <div class="actions">
+              <button class="btn ghost hidden" type="button" id="cancelEditBtn">수정 취소</button>
+              <button class="btn secondary" type="button" id="aiPolishBtn"><span class="material-symbols-rounded">auto_awesome</span>AI 글 다듬기 <small>선택</small></button>
+              <button class="btn primary" type="submit" id="saveRecordBtn"><span class="material-symbols-rounded">save</span>기록 저장</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </section>
+
+    <section class="view" id="teacherView" hidden>
+      <section class="card auth-wrap" id="teacherAuth">
+        <div class="auth-symbol"><span class="material-symbols-rounded">admin_panel_settings</span></div>
+        <h2>교사 로그인</h2>
+        <p>Supabase Authentication에 등록된 교사 계정으로 로그인하세요.</p>
+        <form id="loginForm">
+          <div class="form-grid">
+            <div class="field"><label for="teacherEmail">이메일</label><input class="control" id="teacherEmail" type="email" autocomplete="username" required placeholder="teacher@school.kr" /></div>
+            <div class="field"><label for="teacherPassword">비밀번호</label><input class="control" id="teacherPassword" type="password" autocomplete="current-password" required placeholder="비밀번호" /></div>
+          </div>
+          <div class="actions"><button class="btn primary" type="submit" style="width:100%"><span class="material-symbols-rounded">login</span>로그인</button></div>
+        </form>
+      </section>
+
+      <div id="teacherDashboard" class="hidden">
+        <div class="dashboard-bar">
+          <div><h2>수업 대시보드</h2><p id="teacherIdentity">교사 계정</p></div>
+          <div class="actions">
+            <button class="btn secondary small" id="exportAllBtn"><span class="material-symbols-rounded">download</span>전체 엑셀</button>
+            <button class="btn ghost small" id="logoutBtn"><span class="material-symbols-rounded">logout</span>로그아웃</button>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat"><span>프로젝트</span><strong id="statProjects">0</strong></div>
+          <div class="stat"><span>전체 기록</span><strong id="statRecords">0</strong></div>
+          <div class="stat"><span>참여 학생</span><strong id="statStudents">0</strong></div>
+        </div>
+        <div class="grid two">
+          <section class="card">
+            <div class="section-head">
+              <div><h2 id="projectFormTitle">새 프로젝트</h2><p>생성 즉시 학생용 QR이 만들어집니다.</p></div>
+              <span class="material-symbols-rounded" style="color:var(--primary)">add_box</span>
+            </div>
+            <form id="projectForm">
+              <input type="hidden" id="editingProjectId" />
+              <div class="form-grid" style="margin-top:17px">
+                <div class="field third"><label for="projectGrade">학년</label><select class="control" id="projectGrade" required><option value="">선택</option><option>1</option><option>2</option><option>3</option></select></div>
+                <div class="field third"><label for="projectClass">반</label><input class="control" id="projectClass" required inputmode="numeric" placeholder="예: 3" /></div>
+                <div class="field third"><label for="projectLesson">차시</label><input class="control" id="projectLesson" required inputmode="numeric" min="1" placeholder="예: 4" /></div>
+                <div class="field"><label for="projectName">프로젝트명</label><input class="control" id="projectName" required maxlength="100" placeholder="예: 골드버그 장치 만들기" /></div>
+              </div>
+              <div class="actions">
+                <button class="btn ghost hidden" type="button" id="cancelProjectEditBtn">취소</button>
+                <button class="btn primary" type="submit"><span class="material-symbols-rounded">add</span><span id="projectSubmitText">프로젝트 생성</span></button>
+              </div>
+            </form>
+          </section>
+          <section class="card">
+            <div class="section-head">
+              <div><h2>프로젝트</h2><p>프로젝트를 선택하면 기록이 표시됩니다.</p></div>
+            </div>
+            <div class="toolbar"><input class="control" id="projectSearch" placeholder="프로젝트 검색" aria-label="프로젝트 검색" /></div>
+            <div class="project-list" id="projectList"><div class="empty-state">프로젝트가 없습니다.</div></div>
+          </section>
+        </div>
+        <section class="card form-section">
+          <div class="section-head">
+            <div><h2 id="recordsTitle">학생 기록</h2><p id="recordsSubtitle">프로젝트를 선택하거나 전체 기록을 확인하세요.</p></div>
+            <button class="btn secondary small" id="exportProjectBtn" disabled><span class="material-symbols-rounded">download</span>프로젝트 엑셀</button>
+          </div>
+          <div class="toolbar">
+            <input class="control" id="studentSearch" placeholder="학번 또는 이름 검색" aria-label="학생 검색" />
+            <input class="control" id="dateSearch" type="date" aria-label="날짜 검색" />
+            <button class="btn ghost small" id="clearFiltersBtn"><span class="material-symbols-rounded">filter_alt_off</span>초기화</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>사진</th><th>학생</th><th>날짜</th><th>활동 제목</th><th>오늘 한 일</th><th>어려움 / 해결</th><th>관리</th></tr></thead>
+              <tbody id="recordsBody"><tr><td colspan="7" class="empty-state">표시할 기록이 없습니다.</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <footer class="footer">Makerlog · 학생의 생각은 학생이 직접 씁니다. AI는 선택한 경우에만 문장을 다듬습니다. · <button id="footerSetupBtn">설치 안내</button></footer>
+  </main>
+
+  <dialog id="aiResultDialog">
+    <div class="modal-head"><div><h2>AI 다듬기 결과</h2><p style="margin:4px 0 0;color:var(--muted);font-size:13px">원본의 의미를 유지했는지 비교해 주세요.</p></div><button class="icon-btn" data-close-dialog="aiResultDialog" aria-label="닫기"><span class="material-symbols-rounded">close</span></button></div>
+    <div class="modal-body"><div class="compare-grid" id="aiCompare"></div></div>
+    <div class="modal-foot"><button class="btn ghost" id="keepOriginalBtn">원본 유지</button><button class="btn primary" id="applyAiBtn"><span class="material-symbols-rounded">check</span>AI 수정본 적용</button></div>
+  </dialog>
+
+  <dialog id="qrDialog">
+    <div class="modal-head"><div><h2>학생 접속 QR</h2><p id="qrProjectMeta" style="margin:4px 0 0;color:var(--muted);font-size:13px"></p></div><button class="icon-btn" data-close-dialog="qrDialog" aria-label="닫기"><span class="material-symbols-rounded">close</span></button></div>
+    <div class="modal-body" id="qrPrintArea" style="text-align:center">
+      <h2 id="qrProjectName" style="margin:0 0 4px"></h2><p id="qrProjectInfo" style="margin:0 0 16px;color:var(--muted)"></p>
+      <canvas id="qrCanvas" width="280" height="280" style="max-width:100%;border-radius:14px"></canvas>
+      <p id="qrUrlText" style="font-size:11px;color:var(--muted);word-break:break-all"></p>
+    </div>
+    <div class="modal-foot"><button class="btn ghost" id="printQrBtn"><span class="material-symbols-rounded">print</span>인쇄</button><button class="btn primary" id="downloadQrBtn"><span class="material-symbols-rounded">download</span>PNG 다운로드</button></div>
+  </dialog>
+
+  <dialog id="recordEditDialog">
+    <div class="modal-head"><div><h2>학생 기록 수정</h2><p style="margin:4px 0 0;color:var(--muted);font-size:13px">교사 권한으로 기록 내용을 수정합니다.</p></div><button class="icon-btn" data-close-dialog="recordEditDialog" aria-label="닫기"><span class="material-symbols-rounded">close</span></button></div>
+    <form id="teacherRecordForm">
+      <div class="modal-body">
+        <input type="hidden" id="trId" />
+        <div class="form-grid">
+          <div class="field half"><label for="trNumber">학번</label><input class="control" id="trNumber" required /></div>
+          <div class="field half"><label for="trName">이름</label><input class="control" id="trName" required /></div>
+          <div class="field half"><label for="trDate">날짜</label><input class="control" id="trDate" type="date" required /></div>
+          <div class="field"><label for="trTitle">활동 제목</label><input class="control" id="trTitle" required /></div>
+          <div class="field"><label for="trWork">오늘 한 일</label><textarea class="control" id="trWork" required></textarea></div>
+          <div class="field"><label for="trDifficulties">어려웠던 점</label><textarea class="control" id="trDifficulties" required></textarea></div>
+          <div class="field"><label for="trSolutions">해결한 점</label><textarea class="control" id="trSolutions" required></textarea></div>
+        </div>
+      </div>
+      <div class="modal-foot"><button class="btn ghost" type="button" data-close-dialog="recordEditDialog">취소</button><button class="btn primary" type="submit">수정 저장</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="setupDialog">
+    <div class="modal-head"><div><h2>설치 및 최초 실행</h2><p style="margin:4px 0 0;color:var(--muted);font-size:13px">이 HTML 파일 하나와 Supabase 프로젝트만 있으면 됩니다.</p></div><button class="icon-btn" data-close-dialog="setupDialog" aria-label="닫기"><span class="material-symbols-rounded">close</span></button></div>
+    <div class="modal-body">
+      <div class="setup-tabs"><button class="setup-tab active" data-setup-tab="readme">README</button><button class="setup-tab" data-setup-tab="sql">Supabase SQL</button></div>
+      <div id="readmePane" class="guide">
+        <h3>1. 프로젝트 구조</h3>
+        <p><strong>maker-portfolio.html</strong> 하나에 화면, 스타일, 기능, 설치 안내가 모두 포함되어 있습니다. 외부 패키지는 CDN에서 불러옵니다.</p>
+        <h3>2. Supabase 준비</h3>
+        <ol><li>Supabase에서 새 프로젝트를 만듭니다.</li><li>아래 <strong>Supabase SQL</strong> 탭의 코드를 SQL Editor에서 한 번 실행합니다.</li><li>Authentication → Users에서 교사 이메일 계정을 만듭니다. 이메일 확인이 필요하면 확인 처리합니다.</li><li>Project Settings → API에서 Project URL과 anon public key를 복사합니다.</li></ol>
+        <h3>3. 최초 실행</h3>
+        <ol><li>이 HTML 파일을 브라우저에서 엽니다. 학교 웹서버나 정적 호스팅에 올리면 QR 접속이 편리합니다.</li><li>상단 <strong>설정</strong>에서 Supabase URL, Anon Key를 입력하고 저장합니다.</li><li>AI 다듬기를 사용할 경우에만 Gemini API Key를 입력합니다.</li><li>교사 탭에서 로그인하고 프로젝트를 만든 뒤 QR을 학생에게 배포합니다.</li></ol>
+        <h3>4. 환경 설정</h3>
+        <p>별도 <code>.env</code> 파일은 사용하지 않습니다. Supabase URL, Anon Key, Gemini API Key, 선택 모델은 브라우저 LocalStorage에 저장됩니다. 공용 PC에서는 사용 후 설정값을 지우거나 브라우저 사이트 데이터를 삭제하세요.</p>
+        <h3>5. 운영 전 확인</h3>
+        <ul><li>학생 사진은 <code>portfolio-photos</code> 버킷에 저장됩니다.</li><li>기본 SQL은 로그인 없는 학생 기록 조회/수정을 지원하기 위해 교실 파일럿용 공개 정책을 포함합니다. 실제 학교 운영에서는 학생 인증 또는 보안 RPC 도입을 권장합니다.</li><li>Gemini는 학생이 “AI 글 다듬기”를 눌렀을 때만 호출됩니다. 일반 저장은 AI를 호출하지 않습니다.</li><li>QR 링크가 다른 기기에서도 열리려면 파일을 HTTPS 정적 호스팅에 배포하세요.</li></ul>
+        <div class="actions"><button class="btn secondary" id="downloadReadmeBtn"><span class="material-symbols-rounded">download</span>README.md 다운로드</button></div>
+      </div>
+      <div id="sqlPane" class="hidden">
+        <pre id="sqlCode"></pre>
+        <div class="actions"><button class="btn ghost" id="copySqlBtn"><span class="material-symbols-rounded">content_copy</span>SQL 복사</button><button class="btn primary" id="downloadSqlBtn"><span class="material-symbols-rounded">download</span>supabase-setup.sql</button></div>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+  <div class="loading-overlay hidden" id="loadingOverlay"><div class="loading-box"><span class="spinner"></span><span id="loadingText">처리 중...</span></div></div>
+
+  <script>
+    "use strict";
+
+    /**
+     * Makerlog single-file application.
+     * TypeScript-style JSDoc types and service classes keep this plain JavaScript maintainable.
+     */
+
+    /** @typedef {{id:string,grade:string|number,class:string|number,project_name:string,lesson_number:string|number,qr_url:string,created_at:string}} Project */
+    /** @typedef {{id:string,project_id:string,student_number:string,student_name:string,activity_date:string,photo_url:string,activity_title:string,today_work:string,difficulties:string,solutions:string,created_at:string,updated_at:string,projects?:Project}} Portfolio */
+
+    const SQL_SETUP = `-- Makerlog / 메이커 포트폴리오 Supabase 초기 설정
+-- Supabase Dashboard > SQL Editor에서 전체를 한 번 실행하세요.
+
+create extension if not exists pgcrypto;
+
+create table if not exists public.projects (
+  id uuid primary key default gen_random_uuid(),
+  grade text not null,
+  class text not null,
+  project_name text not null check (char_length(project_name) between 1 and 100),
+  lesson_number integer not null check (lesson_number > 0),
+  qr_url text not null default '',
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.portfolio (
+  id uuid primary key default gen_random_uuid(),
+  project_id uuid not null references public.projects(id) on delete cascade,
+  student_number text not null,
+  student_name text not null,
+  activity_date date not null default current_date,
+  photo_url text not null,
+  activity_title text not null,
+  today_work text not null,
+  difficulties text not null,
+  solutions text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists portfolio_project_id_idx on public.portfolio(project_id);
+create index if not exists portfolio_student_idx on public.portfolio(project_id, student_number, student_name);
+create index if not exists portfolio_activity_date_idx on public.portfolio(activity_date);
+
+create or replace function public.set_updated_at()
+returns trigger language plpgsql security invoker set search_path = public as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists portfolio_set_updated_at on public.portfolio;
+create trigger portfolio_set_updated_at
+before update on public.portfolio
+for each row execute function public.set_updated_at();
+
+alter table public.projects enable row level security;
+alter table public.portfolio enable row level security;
+
+-- 기존 정책을 다시 실행해도 안전하게 정리
+drop policy if exists "Anyone can view projects" on public.projects;
+drop policy if exists "Teachers manage projects" on public.projects;
+drop policy if exists "Students insert portfolio" on public.portfolio;
+drop policy if exists "Classroom can view portfolio" on public.portfolio;
+drop policy if exists "Classroom can update portfolio" on public.portfolio;
+drop policy if exists "Teachers delete portfolio" on public.portfolio;
+
+-- QR 접속 시 프로젝트 정보는 로그인 없이 조회
+create policy "Anyone can view projects"
+on public.projects for select to anon, authenticated
+using (true);
+
+-- 로그인한 교사는 프로젝트 전체 관리
+create policy "Teachers manage projects"
+on public.projects for all to authenticated
+using (true) with check (true);
+
+-- 학생은 로그인 없이 기록 저장
+create policy "Students insert portfolio"
+on public.portfolio for insert to anon, authenticated
+with check (true);
+
+-- 교실 파일럿 정책: 학번+이름으로 이전 기록 조회/수정
+-- 운영 환경에서는 학생 인증 또는 security definer RPC로 교체 권장
+create policy "Classroom can view portfolio"
+on public.portfolio for select to anon, authenticated
+using (true);
+
+create policy "Classroom can update portfolio"
+on public.portfolio for update to anon, authenticated
+using (true) with check (true);
+
+create policy "Teachers delete portfolio"
+on public.portfolio for delete to authenticated
+using (true);
+
+-- 사진 버킷 생성 (10MB, 이미지 형식만 허용)
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'portfolio-photos',
+  'portfolio-photos',
+  true,
+  10485760,
+  array['image/jpeg','image/png','image/webp']
+)
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "Anyone can view portfolio photos" on storage.objects;
+drop policy if exists "Students upload portfolio photos" on storage.objects;
+drop policy if exists "Teachers manage portfolio photos" on storage.objects;
+drop policy if exists "Teachers delete portfolio photos" on storage.objects;
+
+create policy "Anyone can view portfolio photos"
+on storage.objects for select to public
+using (bucket_id = 'portfolio-photos');
+
+create policy "Students upload portfolio photos"
+on storage.objects for insert to anon, authenticated
+with check (bucket_id = 'portfolio-photos');
+
+create policy "Teachers manage portfolio photos"
+on storage.objects for update to authenticated
+using (bucket_id = 'portfolio-photos')
+with check (bucket_id = 'portfolio-photos');
+
+create policy "Teachers delete portfolio photos"
+on storage.objects for delete to authenticated
+using (bucket_id = 'portfolio-photos');`;
+
+    const README_TEXT = `# Makerlog — 메이커 포트폴리오
+
+중학교 기술 프로젝트 수업용 단일 HTML 웹앱입니다.
+
+## 프로젝트 구조
+
+- maker-portfolio.html: UI, CSS, JavaScript, 설치 안내가 모두 포함된 실행 파일
+- 외부 라이브러리: Supabase JS, QRCode, SheetJS를 CDN으로 로드
+
+## 설치
+
+1. Supabase에서 새 프로젝트를 생성합니다.
+2. 앱의 설치 안내 > Supabase SQL을 SQL Editor에서 실행합니다.
+3. Supabase Authentication > Users에서 교사 이메일 계정을 생성합니다.
+4. Project Settings > API에서 Project URL과 anon public key를 복사합니다.
+5. maker-portfolio.html을 브라우저에서 열거나 HTTPS 정적 호스팅에 배포합니다.
+6. 상단 설정에서 Supabase URL과 Anon Key를 저장합니다.
+7. AI 글 다듬기를 사용할 경우에만 Gemini API Key를 저장합니다.
+
+## 환경 설정
+
+별도 .env 파일은 사용하지 않습니다. Supabase URL, Supabase Anon Key, Gemini API Key와 모델은 브라우저 LocalStorage에 저장됩니다.
+
+## 최초 실행
+
+교사 탭에서 로그인 → 프로젝트 생성 → QR 다운로드/인쇄 → 학생에게 배포 순서로 사용합니다.
+학생의 일반 저장은 Gemini API를 호출하지 않으며, AI 글 다듬기 버튼을 누른 경우에만 3개 에이전트가 순서대로 실행됩니다.
+
+## 보안 참고
+
+기본 SQL은 로그인 없는 학생 이전 기록 조회/수정을 위해 교실 파일럿용 공개 정책을 사용합니다. 실제 학교 운영에서는 학생 인증 또는 보안 RPC 도입을 권장합니다.
+공용 PC에서는 사용 후 브라우저 사이트 데이터를 지우세요.`;
+
+    const $ = (selector, root = document) => root.querySelector(selector);
+    const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+
+    const escapeHtml = (value = "") => String(value)
+      .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+
+    const todayLocal = () => {
+      const now = new Date();
+      const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+      return local.toISOString().slice(0, 10);
+    };
+
+    const uuid = () => crypto.randomUUID ? crypto.randomUUID() :
+      "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        return (c === "x" ? r : (r & 3 | 8)).toString(16);
+      });
+
+    function projectUrl(projectId) {
+      const url = new URL(location.href);
+      url.search = "";
+      url.hash = "";
+      url.searchParams.set("project", projectId);
+      url.searchParams.set("mode", "student");
+      return url.toString();
+    }
+
+    function downloadText(filename, content, type = "text/plain;charset=utf-8") {
+      const blob = new Blob(["\ufeff", content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = filename; a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    class UIService {
+      toast(message, type = "") {
+        const el = document.createElement("div");
+        el.className = `toast ${type}`;
+        el.innerHTML = `<span class="material-symbols-rounded">${type === "error" ? "error" : type === "success" ? "check_circle" : "info"}</span><span>${escapeHtml(message)}</span>`;
+        $("#toastStack").append(el);
+        setTimeout(() => el.remove(), 3600);
+      }
+      loading(show, text = "처리 중...") {
+        $("#loadingText").textContent = text;
+        $("#loadingOverlay").classList.toggle("hidden", !show);
+      }
+      confirm(message) { return window.confirm(message); }
+      showDialog(id) {
+        const dialog = document.getElementById(id);
+        if (dialog && !dialog.open) dialog.showModal();
+      }
+      closeDialog(id) {
+        const dialog = document.getElementById(id);
+        if (dialog?.open) dialog.close();
+      }
+    }
+
+    class ConfigService {
+      static KEY = "makerlog_config_v1";
+      load() {
+        try {
+          return JSON.parse(localStorage.getItem(ConfigService.KEY) || "{}");
+        } catch { return {}; }
+      }
+      save(config) { localStorage.setItem(ConfigService.KEY, JSON.stringify(config)); }
+    }
+
+    class DatabaseService {
+      client = null;
+      init(url, key) {
+        if (!url || !key) { this.client = null; return false; }
+        if (!window.supabase?.createClient) throw new Error("Supabase 라이브러리를 불러오지 못했습니다.");
+        this.client = window.supabase.createClient(url.trim(), key.trim(), {
+          auth: { persistSession: true, autoRefreshToken: true }
+        });
+        return true;
+      }
+      require() {
+        if (!this.client) throw new Error("상단 설정에서 Supabase 연결 정보를 먼저 저장해 주세요.");
+        return this.client;
+      }
+      async getProject(id) {
+        const { data, error } = await this.require().from("projects").select("*").eq("id", id).single();
+        if (error) throw error; return data;
+      }
+      async getProjects() {
+        const { data, error } = await this.require().from("projects").select("*").order("created_at", { ascending: false });
+        if (error) throw error; return data || [];
+      }
+      async saveProject(values, id = "") {
+        if (id) {
+          const { data, error } = await this.require().from("projects").update(values).eq("id", id).select().single();
+          if (error) throw error; return data;
+        }
+        const { data, error } = await this.require().from("projects").insert(values).select().single();
+        if (error) throw error; return data;
+      }
+      async updateProjectQr(id, qrUrl) {
+        const { error } = await this.require().from("projects").update({ qr_url: qrUrl }).eq("id", id);
+        if (error) throw error;
+      }
+      async deleteProject(id) {
+        const { error } = await this.require().from("projects").delete().eq("id", id);
+        if (error) throw error;
+      }
+      async getStudentRecords(projectId, studentNumber, studentName) {
+        const { data, error } = await this.require().from("portfolio").select("*")
+          .eq("project_id", projectId).eq("student_number", studentNumber).eq("student_name", studentName)
+          .order("activity_date", { ascending: false }).order("created_at", { ascending: false });
+        if (error) throw error; return data || [];
+      }
+      async getAllRecords() {
+        const { data, error } = await this.require().from("portfolio").select("*, projects(*)")
+          .order("activity_date", { ascending: false }).order("created_at", { ascending: false });
+        if (error) throw error; return data || [];
+      }
+      async uploadPhoto(file, projectId) {
+        const ext = (file.type.split("/")[1] || "jpg").replace("jpeg", "jpg");
+        const path = `${projectId}/${new Date().getFullYear()}/${uuid()}.${ext}`;
+        const { error } = await this.require().storage.from("portfolio-photos").upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+        if (error) throw error;
+        return this.require().storage.from("portfolio-photos").getPublicUrl(path).data.publicUrl;
+      }
+      async saveRecord(values, id = "") {
+        if (id) {
+          const { data, error } = await this.require().from("portfolio").update(values).eq("id", id).select().single();
+          if (error) throw error; return data;
+        }
+        const { data, error } = await this.require().from("portfolio").insert(values).select().single();
+        if (error) throw error; return data;
+      }
+      async deleteRecord(id) {
+        const { error } = await this.require().from("portfolio").delete().eq("id", id);
+        if (error) throw error;
+      }
+      async getSession() {
+        const { data, error } = await this.require().auth.getSession();
+        if (error) throw error; return data.session;
+      }
+      async login(email, password) {
+        const { data, error } = await this.require().auth.signInWithPassword({ email, password });
+        if (error) throw error; return data.session;
+      }
+      async logout() {
+        const { error } = await this.require().auth.signOut();
+        if (error) throw error;
+      }
+    }
+
+    class GeminiService {
+      async generate(apiKey, model, prompt) {
+        if (!apiKey) throw new Error("Gemini API Key를 설정해 주세요.");
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.1, responseMimeType: "application/json" }
+          })
+        });
+        const json = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(json?.error?.message || `Gemini 요청 실패 (${response.status})`);
+        const text = json?.candidates?.[0]?.content?.parts?.map(p => p.text || "").join("") || "";
+        if (!text) throw new Error("Gemini가 빈 결과를 반환했습니다.");
+        try { return JSON.parse(text.replace(/^```json\s*|\s*```$/g, "")); }
+        catch { throw new Error("Gemini 결과 형식을 해석하지 못했습니다."); }
+      }
+      async polish(apiKey, model, original, onStep) {
+        onStep("collect", "🟢 수집 에이전트 실행 중...");
+        const required = ["activity_title", "today_work", "difficulties", "solutions"];
+        const missing = required.filter(k => !String(original[k] || "").trim());
+        if (missing.length) throw new Error("필수 활동 내용을 모두 입력해 주세요.");
+        await new Promise(resolve => setTimeout(resolve, 420));
+
+        onStep("write", "🟢 작성 에이전트 실행 중...");
+        const written = await this.generate(apiKey, model, `당신은 중학생 메이커 포트폴리오의 '작성 에이전트'입니다.
+학생이 직접 쓴 한국어 문장의 맞춤법을 교정하고, 문장을 자연스럽게 정리하세요.
+절대 새로운 사실, 활동, 감정, 도구, 결과를 추가하거나 추측하지 마세요. 학생의 말투와 의미를 최대한 유지하세요.
+입력과 똑같은 4개 키를 가진 JSON 객체만 반환하세요.
+
+입력:
+${JSON.stringify(original, null, 2)}`);
+
+        onStep("review", "🟢 검토 에이전트 실행 중...");
+        const reviewed = await this.generate(apiKey, model, `당신은 중학생 메이커 포트폴리오의 '검토 에이전트'입니다.
+원본과 작성 에이전트 수정본을 비교해 맞춤법, 문장 흐름, 필수 항목 누락을 검토하세요.
+새로운 내용을 절대 만들지 말고, 원본의 의미가 달라진 부분은 원래 의미로 되돌리세요.
+최종 결과는 activity_title, today_work, difficulties, solutions의 4개 키만 가진 JSON 객체로 반환하세요.
+
+원본:
+${JSON.stringify(original, null, 2)}
+
+작성 에이전트 수정본:
+${JSON.stringify(written, null, 2)}`);
+        onStep("done", "✅ 3개 에이전트의 검토가 끝났습니다.");
+        const clean = {};
+        required.forEach(k => clean[k] = String(reviewed[k] ?? written[k] ?? original[k]));
+        return clean;
+      }
+    }
+
+    class ExcelService {
+      export(records, filename) {
+        if (!window.XLSX) throw new Error("엑셀 라이브러리를 불러오지 못했습니다.");
+        if (!records.length) throw new Error("다운로드할 기록이 없습니다.");
+        const rows = records.map(r => ({
+          "학년": r.projects?.grade ?? "",
+          "반": r.projects?.class ?? "",
+          "프로젝트명": r.projects?.project_name ?? "",
+          "차시": r.projects?.lesson_number ?? "",
+          "학번": r.student_number,
+          "이름": r.student_name,
+          "날짜": r.activity_date,
+          "활동 제목": r.activity_title,
+          "오늘 한 일": r.today_work,
+          "어려웠던 점": r.difficulties,
+          "해결한 점": r.solutions,
+          "사진 링크": r.photo_url
+        }));
+        const sheet = XLSX.utils.json_to_sheet(rows);
+        sheet["!cols"] = [8,8,24,8,12,12,13,28,45,45,45,45].map(wch => ({ wch }));
+        const book = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(book, sheet, "메이커 포트폴리오");
+        XLSX.writeFile(book, filename);
+      }
+    }
+
+    class MakerlogApp {
+      ui = new UIService();
+      configService = new ConfigService();
+      db = new DatabaseService();
+      gemini = new GeminiService();
+      excel = new ExcelService();
+      config = {};
+      currentProject = null;
+      projects = [];
+      records = [];
+      studentRecords = [];
+      editingStudentRecord = null;
+      aiResult = null;
+      selectedProjectId = "";
+      currentQrProject = null;
+
+      constructor() { this.init(); }
+
+      async init() {
+        $("#activityDate").value = todayLocal();
+        $("#sqlCode").textContent = SQL_SETUP;
+        this.loadTheme();
+        this.loadConfig();
+        this.bindEvents();
+        const params = new URLSearchParams(location.search);
+        const projectId = params.get("project");
+        this.setMode(params.get("mode") === "teacher" ? "teacher" : "student");
+        if (projectId) await this.loadStudentProject(projectId);
+        await this.restoreTeacherSession();
+      }
+
+      loadTheme() {
+        const saved = localStorage.getItem("makerlog_theme");
+        const dark = saved ? saved === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+        $("#themeBtn .material-symbols-rounded").textContent = dark ? "light_mode" : "dark_mode";
+      }
+
+      toggleTheme() {
+        const dark = document.documentElement.dataset.theme !== "dark";
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+        localStorage.setItem("makerlog_theme", dark ? "dark" : "light");
+        $("#themeBtn .material-symbols-rounded").textContent = dark ? "light_mode" : "dark_mode";
+      }
+
+      loadConfig() {
+        this.config = this.configService.load();
+        $("#geminiKey").value = this.config.geminiKey || "";
+        $("#geminiModel").value = this.config.geminiModel || "gemini-3.5-flash-lite";
+        $("#supabaseUrl").value = this.config.supabaseUrl || "";
+        $("#supabaseKey").value = this.config.supabaseKey || "";
+        this.connectDatabase(false);
+        if (!this.config.supabaseUrl || !this.config.supabaseKey) $("#configPanel").removeAttribute("hidden");
+      }
+
+      connectDatabase(showToast = true) {
+        try {
+          const connected = this.db.init(this.config.supabaseUrl, this.config.supabaseKey);
+          $("#connectionDot").classList.toggle("ok", connected);
+          $("#connectionText").textContent = connected ? "Supabase 연결 정보가 준비되었습니다." : "연결 정보가 필요합니다.";
+          if (showToast) this.ui.toast(connected ? "설정을 저장했습니다." : "설정값을 저장했습니다. Supabase 정보는 비어 있습니다.", connected ? "success" : "");
+        } catch (error) {
+          $("#connectionDot").classList.remove("ok");
+          $("#connectionText").textContent = "연결 정보를 확인해 주세요.";
+          if (showToast) this.ui.toast(error.message, "error");
+        }
+      }
+
+      saveConfig() {
+        this.config = {
+          geminiKey: $("#geminiKey").value.trim(),
+          geminiModel: $("#geminiModel").value,
+          supabaseUrl: $("#supabaseUrl").value.trim().replace(/\/$/, ""),
+          supabaseKey: $("#supabaseKey").value.trim()
+        };
+        this.configService.save(this.config);
+        this.connectDatabase(true);
+        if (this.config.supabaseUrl && this.config.supabaseKey) {
+          setTimeout(() => this.restoreTeacherSession(), 0);
+          const projectId = new URLSearchParams(location.search).get("project");
+          if (projectId) setTimeout(() => this.loadStudentProject(projectId), 0);
+        }
+      }
+
+      bindEvents() {
+        $("#themeBtn").addEventListener("click", () => this.toggleTheme());
+        $("#configBtn").addEventListener("click", () => $("#configPanel").toggleAttribute("hidden"));
+        $("#configCloseBtn").addEventListener("click", () => $("#configPanel").setAttribute("hidden", ""));
+        $("#saveConfigBtn").addEventListener("click", () => this.saveConfig());
+        $("#setupBtn").addEventListener("click", () => this.ui.showDialog("setupDialog"));
+        $("#footerSetupBtn").addEventListener("click", () => this.ui.showDialog("setupDialog"));
+        $$(".mode-btn").forEach(btn => btn.addEventListener("click", () => this.setMode(btn.dataset.mode)));
+        $$("[data-close-dialog]").forEach(btn => btn.addEventListener("click", () => this.ui.closeDialog(btn.dataset.closeDialog)));
+        $$("dialog").forEach(dialog => dialog.addEventListener("click", e => {
+          if (e.target === dialog) dialog.close();
+        }));
+        $$(".setup-tab").forEach(btn => btn.addEventListener("click", () => this.setSetupTab(btn.dataset.setupTab)));
+        $("#copySqlBtn").addEventListener("click", () => navigator.clipboard.writeText(SQL_SETUP).then(() => this.ui.toast("SQL을 복사했습니다.", "success")).catch(() => this.ui.toast("복사하지 못했습니다.", "error")));
+        $("#downloadSqlBtn").addEventListener("click", () => downloadText("supabase-setup.sql", SQL_SETUP));
+        $("#downloadReadmeBtn").addEventListener("click", () => downloadText("README.md", README_TEXT, "text/markdown;charset=utf-8"));
+        $("#photoInput").addEventListener("change", e => this.previewPhoto(e.target.files?.[0]));
+        $("#portfolioForm").addEventListener("submit", e => { e.preventDefault(); this.saveStudentRecord(); });
+        $("#loadHistoryBtn").addEventListener("click", () => this.loadStudentHistory());
+        $("#aiPolishBtn").addEventListener("click", () => this.runAiWorkflow());
+        $("#keepOriginalBtn").addEventListener("click", () => { this.ui.closeDialog("aiResultDialog"); this.ui.toast("원본을 유지합니다."); });
+        $("#applyAiBtn").addEventListener("click", () => this.applyAiResult());
+        $("#cancelEditBtn").addEventListener("click", () => this.resetStudentForm());
+        $("#loginForm").addEventListener("submit", e => { e.preventDefault(); this.teacherLogin(); });
+        $("#logoutBtn").addEventListener("click", () => this.teacherLogout());
+        $("#projectForm").addEventListener("submit", e => { e.preventDefault(); this.saveProject(); });
+        $("#cancelProjectEditBtn").addEventListener("click", () => this.resetProjectForm());
+        $("#projectSearch").addEventListener("input", () => this.renderProjects());
+        $("#studentSearch").addEventListener("input", () => this.renderRecords());
+        $("#dateSearch").addEventListener("change", () => this.renderRecords());
+        $("#clearFiltersBtn").addEventListener("click", () => { $("#studentSearch").value = ""; $("#dateSearch").value = ""; this.renderRecords(); });
+        $("#exportAllBtn").addEventListener("click", () => this.exportAll());
+        $("#exportProjectBtn").addEventListener("click", () => this.exportProject());
+        $("#printQrBtn").addEventListener("click", () => window.print());
+        $("#downloadQrBtn").addEventListener("click", () => this.downloadQr());
+        $("#teacherRecordForm").addEventListener("submit", e => { e.preventDefault(); this.saveTeacherRecord(); });
+      }
+
+      setMode(mode) {
+        $$(".mode-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.mode === mode));
+        $("#studentView").hidden = mode !== "student";
+        $("#teacherView").hidden = mode !== "teacher";
+      }
+
+      setSetupTab(tab) {
+        $$(".setup-tab").forEach(btn => btn.classList.toggle("active", btn.dataset.setupTab === tab));
+        $("#readmePane").classList.toggle("hidden", tab !== "readme");
+        $("#sqlPane").classList.toggle("hidden", tab !== "sql");
+      }
+
+      friendlyError(error) {
+        console.error(error);
+        const message = error?.message || String(error);
+        if (/Failed to fetch/i.test(message)) return "서버에 연결하지 못했습니다. 인터넷과 설정값을 확인해 주세요.";
+        if (/Invalid API key|API_KEY_INVALID/i.test(message)) return "API Key가 올바르지 않습니다.";
+        if (/relation .* does not exist/i.test(message)) return "Supabase 테이블이 없습니다. 설치 안내의 SQL을 먼저 실행해 주세요.";
+        if (/row-level security/i.test(message)) return "저장 권한이 없습니다. Supabase SQL 정책을 확인해 주세요.";
+        return message;
+      }
+
+      validateStudentForm(includePhoto = true) {
+        const required = [
+          ["#studentNumber", "학번"], ["#studentName", "이름"], ["#activityDate", "날짜"],
+          ["#activityTitle", "활동 제목"], ["#todayWork", "오늘 한 일"],
+          ["#difficulties", "어려웠던 점"], ["#solutions", "해결한 점"]
+        ];
+        $$(".control.invalid").forEach(el => el.classList.remove("invalid"));
+        const missing = required.filter(([sel]) => !$(sel).value.trim());
+        missing.forEach(([sel]) => $(sel).classList.add("invalid"));
+        if (!this.currentProject) throw new Error("프로젝트 QR로 접속해 주세요.");
+        if (missing.length) {
+          $(missing[0][0]).focus();
+          throw new Error(`${missing[0][1]} 항목을 입력해 주세요.`);
+        }
+        if (includePhoto && !this.editingStudentRecord?.photo_url && !$("#photoInput").files?.[0]) throw new Error("활동 사진 1장을 선택해 주세요.");
+        return true;
+      }
+
+      getTextFields() {
+        return {
+          activity_title: $("#activityTitle").value.trim(),
+          today_work: $("#todayWork").value.trim(),
+          difficulties: $("#difficulties").value.trim(),
+          solutions: $("#solutions").value.trim()
+        };
+      }
+
+      async loadStudentProject(id) {
+        try {
+          if (!this.db.client) {
+            $("#configPanel").removeAttribute("hidden");
+            this.ui.toast("Supabase 연결 정보를 먼저 입력해 주세요.");
+            return;
+          }
+          this.ui.loading(true, "프로젝트를 불러오는 중...");
+          this.currentProject = await this.db.getProject(id);
+          $("#studentNoProject").classList.add("hidden");
+          $("#studentWorkspace").classList.remove("hidden");
+          $("#studentProjectName").textContent = this.currentProject.project_name;
+          $("#studentProjectMeta").textContent = `${this.currentProject.grade}학년 ${this.currentProject.class}반`;
+          $("#studentLesson").textContent = this.currentProject.lesson_number;
+          document.title = `${this.currentProject.project_name} · Makerlog`;
+        } catch (error) {
+          this.ui.toast(this.friendlyError(error), "error");
+          $("#studentNoProject h2").textContent = "프로젝트를 찾지 못했어요";
+          $("#studentNoProject p").textContent = "QR 링크가 올바른지 교사에게 확인해 주세요.";
+        } finally { this.ui.loading(false); }
+      }
+
+      previewPhoto(file) {
+        if (!file) return;
+        if (!/^image\/(jpeg|png|webp)$/.test(file.type)) { $("#photoInput").value = ""; return this.ui.toast("JPG, PNG, WebP 이미지만 선택할 수 있습니다.", "error"); }
+        if (file.size > 10 * 1024 * 1024) { $("#photoInput").value = ""; return this.ui.toast("사진은 10MB 이하만 가능합니다.", "error"); }
+        const img = $("#photoPreview");
+        img.src = URL.createObjectURL(file);
+        img.hidden = false; $("#photoPrompt").hidden = true;
+        img.onload = () => URL.revokeObjectURL(img.src);
+      }
+
+      async saveStudentRecord() {
+        try {
+          this.validateStudentForm(true);
+          this.ui.loading(true, this.editingStudentRecord ? "기록을 수정하는 중..." : "사진과 기록을 저장하는 중...");
+          let photoUrl = this.editingStudentRecord?.photo_url || "";
+          const file = $("#photoInput").files?.[0];
+          if (file) photoUrl = await this.db.uploadPhoto(file, this.currentProject.id);
+          const values = {
+            project_id: this.currentProject.id,
+            student_number: $("#studentNumber").value.trim(),
+            student_name: $("#studentName").value.trim(),
+            activity_date: $("#activityDate").value,
+            photo_url: photoUrl,
+            ...this.getTextFields()
+          };
+          await this.db.saveRecord(values, this.editingStudentRecord?.id || "");
+          this.ui.toast(this.editingStudentRecord ? "기록을 수정했습니다." : "오늘의 기록을 저장했습니다!", "success");
+          this.resetStudentForm(true);
+          await this.loadStudentHistory(false);
+        } catch (error) { this.ui.toast(this.friendlyError(error), "error"); }
+        finally { this.ui.loading(false); }
+      }
+
+      async loadStudentHistory(showLoading = true) {
+        const number = $("#studentNumber").value.trim();
+        const name = $("#studentName").value.trim();
+        if (!this.currentProject) return this.ui.toast("프로젝트 QR로 접속해 주세요.", "error");
+        if (!number || !name) return this.ui.toast("학번과 이름을 모두 입력해 주세요.", "error");
+        try {
+          if (showLoading) this.ui.loading(true, "이전 기록을 찾는 중...");
+          this.studentRecords = await this.db.getStudentRecords(this.currentProject.id, number, name);
+          this.renderStudentHistory();
+        } catch (error) { this.ui.toast(this.friendlyError(error), "error"); }
+        finally { if (showLoading) this.ui.loading(false); }
+      }
+
+      renderStudentHistory() {
+        $("#historyCount").textContent = `${this.studentRecords.length}개의 기록`;
+        if (!this.studentRecords.length) {
+          $("#studentHistory").innerHTML = `<div class="empty-state">이 프로젝트의 이전 기록이 없어요.</div>`;
+          return;
+        }
+        $("#studentHistory").innerHTML = this.studentRecords.map(r => `
+          <article class="record-item">
+            ${r.photo_url ? `<img class="record-thumb" src="${escapeHtml(r.photo_url)}" alt="" loading="lazy">` : `<div class="record-thumb record-placeholder"><span class="material-symbols-rounded">image</span></div>`}
+            <div class="record-copy"><strong>${escapeHtml(r.activity_title)}</strong><small>${escapeHtml(r.activity_date)} · ${escapeHtml(r.today_work)}</small></div>
+            <div class="actions"><button class="btn ghost small" data-student-edit="${r.id}"><span class="material-symbols-rounded">edit</span>수정</button></div>
+          </article>`).join("");
+        $$("[data-student-edit]").forEach(btn => btn.addEventListener("click", () => this.editStudentRecord(btn.dataset.studentEdit)));
+      }
+
+      editStudentRecord(id) {
+        const r = this.studentRecords.find(item => item.id === id);
+        if (!r) return;
+        this.editingStudentRecord = r;
+        $("#activityDate").value = r.activity_date;
+        $("#activityTitle").value = r.activity_title;
+        $("#todayWork").value = r.today_work;
+        $("#difficulties").value = r.difficulties;
+        $("#solutions").value = r.solutions;
+        if (r.photo_url) {
+          $("#photoPreview").src = r.photo_url; $("#photoPreview").hidden = false; $("#photoPrompt").hidden = true;
+        }
+        $("#formTitle").textContent = "이전 기록 수정";
+        $("#editBadge").hidden = false;
+        $("#cancelEditBtn").classList.remove("hidden");
+        $("#saveRecordBtn").innerHTML = `<span class="material-symbols-rounded">save</span>수정 저장`;
+        $("#portfolioFormCard").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      resetStudentForm(keepIdentity = true) {
+        const number = keepIdentity ? $("#studentNumber").value : "";
+        const name = keepIdentity ? $("#studentName").value : "";
+        $("#portfolioForm").reset();
+        $("#studentNumber").value = number; $("#studentName").value = name;
+        $("#activityDate").value = todayLocal();
+        $("#photoPreview").hidden = true; $("#photoPreview").removeAttribute("src"); $("#photoPrompt").hidden = false;
+        this.editingStudentRecord = null;
+        $("#formTitle").textContent = "오늘의 활동 기록";
+        $("#editBadge").hidden = true;
+        $("#cancelEditBtn").classList.add("hidden");
+        $("#saveRecordBtn").innerHTML = `<span class="material-symbols-rounded">save</span>기록 저장`;
+        this.resetAgents();
+      }
+
+      resetAgents() {
+        $$(".agent-step").forEach(step => step.classList.remove("running", "done"));
+        $("#agentLive").innerHTML = "";
+      }
+
+      setAgentStep(step, message) {
+        const order = ["collect", "write", "review"];
+        if (step === "done") {
+          $$(".agent-step").forEach(el => { el.classList.remove("running"); el.classList.add("done"); });
+          $("#agentLive").innerHTML = `<span class="material-symbols-rounded">task_alt</span>${escapeHtml(message)}`;
+          return;
+        }
+        const index = order.indexOf(step);
+        $$(".agent-step").forEach((el, i) => {
+          el.classList.toggle("running", i === index);
+          el.classList.toggle("done", i < index);
+        });
+        $("#agentLive").innerHTML = `<span class="spinner"></span>${escapeHtml(message)}`;
+      }
+
+      async runAiWorkflow() {
+        try {
+          this.validateStudentForm(false);
+          $("#aiPolishBtn").disabled = true;
+          this.resetAgents();
+          const original = this.getTextFields();
+          this.aiResult = await this.gemini.polish(this.config.geminiKey, this.config.geminiModel || "gemini-3.5-flash-lite", original, (step, msg) => this.setAgentStep(step, msg));
+          this.renderAiCompare(original, this.aiResult);
+          this.ui.showDialog("aiResultDialog");
+        } catch (error) {
+          this.resetAgents();
+          this.ui.toast(this.friendlyError(error), "error");
+          if (/API Key/.test(error.message)) $("#configPanel").removeAttribute("hidden");
+        } finally { $("#aiPolishBtn").disabled = false; }
+      }
+
+      renderAiCompare(original, revised) {
+        const fields = [["activity_title","활동 제목"],["today_work","오늘 한 일"],["difficulties","어려웠던 점"],["solutions","해결한 점"]];
+        const column = (title, data) => `<div class="compare-col"><strong>${title}</strong>${fields.map(([key,label]) =>
+          `<div class="compare-block"><label>${label}</label><p>${escapeHtml(data[key] || "")}</p></div>`).join("")}</div>`;
+        $("#aiCompare").innerHTML = column("내가 쓴 원본", original) + column("AI 수정본", revised);
+      }
+
+      applyAiResult() {
+        if (!this.aiResult) return;
+        $("#activityTitle").value = this.aiResult.activity_title;
+        $("#todayWork").value = this.aiResult.today_work;
+        $("#difficulties").value = this.aiResult.difficulties;
+        $("#solutions").value = this.aiResult.solutions;
+        this.ui.closeDialog("aiResultDialog");
+        this.ui.toast("AI 수정본을 적용했습니다. 확인 후 저장해 주세요.", "success");
+      }
+
+      async restoreTeacherSession() {
+        if (!this.db.client) return;
+        try {
+          const session = await this.db.getSession();
+          this.renderAuth(session);
+          if (session) await this.loadTeacherData();
+        } catch (error) { console.warn(error); }
+      }
+
+      renderAuth(session) {
+        $("#teacherAuth").classList.toggle("hidden", !!session);
+        $("#teacherDashboard").classList.toggle("hidden", !session);
+        if (session) $("#teacherIdentity").textContent = `${session.user.email} 계정`;
+      }
+
+      async teacherLogin() {
+        try {
+          this.ui.loading(true, "로그인 중...");
+          const session = await this.db.login($("#teacherEmail").value.trim(), $("#teacherPassword").value);
+          this.renderAuth(session);
+          $("#loginForm").reset();
+          await this.loadTeacherData();
+          this.ui.toast("교사로 로그인했습니다.", "success");
+        } catch (error) { this.ui.toast(this.friendlyError(error), "error"); }
+        finally { this.ui.loading(false); }
+      }
+
+      async teacherLogout() {
+        try {
+          await this.db.logout();
+          this.projects = []; this.records = []; this.selectedProjectId = "";
+          this.renderAuth(null);
+          this.ui.toast("로그아웃했습니다.");
+        } catch (error) { this.ui.toast(this.friendlyError(error), "error"); }
+      }
+
+      async loadTeacherData(showLoading = true) {
+        try {
+          if (showLoading) this.ui.loading(true, "수업 데이터를 불러오는 중...");
+          [this.projects, this.records] = await Promise.all([this.db.getProjects(), this.db.getAllRecords()]);
+          this.renderProjects(); this.renderRecords(); this.renderStats();
+        } catch (error) { this.ui.toast(this.friendlyError(error), "error"); }
+        finally { if (showLoading) this.ui.loading(false); }
+      }
+
+      renderStats() {
+        $("#statProjects").textContent = this.projects.length;
+        $("#statRecords").textContent = this.records.length;
+        $("#statStudents").textContent = new Set(this.records.map(r => `${r.student_number}|${r.student_name}`)).size;
+      }
+
+      async saveProject() {
+        try {
+          const id = $("#editingProjectId").value;
+          const values = {
+            grade: $("#projectGrade").value,
+            class: $("#projectClass").value.trim(),
+            project_name: $("#projectName").value.trim(),
+            lesson_number: Number($("#projectLesson").value),
+            qr_url: id ? (this.projects.find(p => p.id === id)?.qr_url || projectUrl(id)) : ""
+          };
+          this.ui.loading(true, id ? "프로젝트 수정 중..." : "프로젝트 생성 중...");
+          const saved = await this.db.saveProject(values, id);
+          if (!id) await this.db.updateProjectQr(saved.id, projectUrl(saved.id));
+          this.resetProjectForm();
+          await this.loadTeacherData(false);
+          this.ui.toast(id ? "프로젝트를 수정했습니다." : "프로젝트와 QR을 만들었습니다.", "success");
+          if (!id) this.openQr(saved.id);
+        } catch (error) { this.ui.toast(this.friendlyError(error), "error"); }
+        finally { this.ui.loading(false); }
+      }
+
+      resetProjectForm() {
+        $("#projectForm").reset(); $("#editingProjectId").value = "";
+        $("#projectFormTitle").textContent = "새 프로젝트";
+        $("#projectSubmitText").textContent = "프로젝트 생성";
+        $("#cancelProjectEditBtn").classList.add("hidden");
+      }
+
+      editProject(id) {
+        const p = this.projects.find(item => item.id === id);
+        if (!p) return;
+        $("#editingProjectId").value = p.id;
+        $("#projectGrade").value = p.grade;
+        $("#projectClass").value = p.class;
+        $("#projectLesson").value = p.lesson_number;
+        $("#projectName").value = p.project_name;
+        $("#projectFormTitle").textContent = "프로젝트 수정";
+        $("#projectSubmitText").textContent = "수정 저장";
+        $("#cancelProjectEditBtn").classList.remove("hidden");
+        $("#projectForm").scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      async removeProject(id) {
+        const p = this.projects.find(item => item.id === id);
+        if (!p || !this.ui.confirm(`“${p.project_name}” 프로젝트와 연결된 모든 기록을 삭제할까요?\n이 작업은 되돌릴 수 없습니다.`)) return;
+        try {
+          this.ui.loading(true, "프로젝트를 삭제하는 중...");
+          await this.db.deleteProject(id);
+          if (this.selectedProjectId === id) this.selectedProjectId = "";
+          await this.loadTeacherData(false);
+          this.ui.toast("프로젝트와 연결 기록을 삭제했습니다.", "success");
+        } catch (error) { this.ui.toast(this.friendlyError(error), "error"); }
+        finally { this.ui.loading(false); }
+      }
+
+      renderProjects() {
+        const query = $("#projectSearch").value.trim().toLowerCase();
+        const list = this.projects.filter(p => `${p.project_name} ${p.grade} ${p.class} ${p.lesson_number}`.toLowerCase().includes(query));
+        if (!list.length) { $("#projectList").innerHTML = `<div class="empty-state">${query ? "검색 결과가 없습니다." : "프로젝트를 만들어 보세요."}</div>`; return; }
+        $("#projectList").innerHTML = list.map(p => `
+          <article class="project-card ${p.id === this.selectedProjectId ? "active" : ""}">
+            <div class="project-card-top"><div><h3>${escapeHtml(p.project_name)}</h3><p>${escapeHtml(p.grade)}학년 ${escapeHtml(p.class)}반 · ${escapeHtml(p.lesson_number)}차시</p></div><span class="chip">${this.records.filter(r => r.project_id === p.id).length}건</span></div>
+            <div class="actions">
+              <button class="btn primary small" data-select-project="${p.id}"><span class="material-symbols-rounded">list_alt</span>기록</button>
+              <button class="btn secondary small" data-qr-project="${p.id}"><span class="material-symbols-rounded">qr_code_2</span>QR</button>
+              <button class="btn ghost small" data-edit-project="${p.id}"><span class="material-symbols-rounded">edit</span></button>
+              <button class="btn danger small" data-delete-project="${p.id}"><span class="material-symbols-rounded">delete</span></button>
+            </div>
+          </article>`).join("");
+        $$("[data-select-project]").forEach(b => b.addEventListener("click", () => this.selectProject(b.dataset.selectProject)));
+        $$("[data-qr-project]").forEach(b => b.addEventListener("click", () => this.openQr(b.dataset.qrProject)));
+        $$("[data-edit-project]").forEach(b => b.addEventListener("click", () => this.editProject(b.dataset.editProject)));
+        $$("[data-delete-project]").forEach(b => b.addEventListener("click", () => this.removeProject(b.dataset.deleteProject)));
+      }
+
+      selectProject(id) {
+        this.selectedProjectId = id;
+        this.renderProjects(); this.renderRecords();
+        $("#exportProjectBtn").disabled = false;
+        const p = this.projects.find(item => item.id === id);
+        $("#recordsTitle").textContent = p ? p.project_name : "학생 기록";
+        $("#recordsSubtitle").textContent = p ? `${p.grade}학년 ${p.class}반 · ${p.lesson_number}차시` : "";
+        $("#recordsTitle").scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      filteredRecords() {
+        const student = $("#studentSearch").value.trim().toLowerCase();
+        const date = $("#dateSearch").value;
+        return this.records.filter(r =>
+          (!this.selectedProjectId || r.project_id === this.selectedProjectId) &&
+          (!student || `${r.student_number} ${r.student_name}`.toLowerCase().includes(student)) &&
+          (!date || r.activity_date === date)
+        );
+      }
+
+      renderRecords() {
+        const list = this.filteredRecords();
+        if (!list.length) { $("#recordsBody").innerHTML = `<tr><td colspan="7" class="empty-state">조건에 맞는 기록이 없습니다.</td></tr>`; return; }
+        $("#recordsBody").innerHTML = list.map(r => `
+          <tr>
+            <td>${r.photo_url ? `<a href="${escapeHtml(r.photo_url)}" target="_blank" rel="noopener"><img class="table-photo" src="${escapeHtml(r.photo_url)}" alt="활동 사진" loading="lazy"></a>` : "-"}</td>
+            <td><strong>${escapeHtml(r.student_name)}</strong><br><span style="color:var(--muted)">${escapeHtml(r.student_number)}</span></td>
+            <td>${escapeHtml(r.activity_date)}</td>
+            <td><div class="cell-text"><strong>${escapeHtml(r.activity_title)}</strong></div></td>
+            <td><div class="cell-text">${escapeHtml(r.today_work)}</div></td>
+            <td><div class="cell-text">${escapeHtml(r.difficulties)}<br><span style="color:var(--mint)">→ ${escapeHtml(r.solutions)}</span></div></td>
+            <td><div style="display:flex;gap:5px"><button class="btn ghost small" data-edit-record="${r.id}" aria-label="수정"><span class="material-symbols-rounded">edit</span></button><button class="btn danger small" data-delete-record="${r.id}" aria-label="삭제"><span class="material-symbols-rounded">delete</span></button></div></td>
+          </tr>`).join("");
+        $$("[data-edit-record]").forEach(b => b.addEventListener("click", () => this.openTeacherRecordEdit(b.dataset.editRecord)));
+        $$("[data-delete-record]").forEach(b => b.addEventListener("click", () => this.removeRecord(b.dataset.deleteRecord)));
+      }
+
+      openTeacherRecordEdit(id) {
+        const r = this.records.find(item => item.id === id);
+        if (!r) return;
+        $("#trId").value = r.id; $("#trNumber").value = r.student_number; $("#trName").value = r.student_name;
+        $("#trDate").value = r.activity_date; $("#trTitle").value = r.activity_title; $("#trWork").value = r.today_work;
+        $("#trDifficulties").value = r.difficulties; $("#trSolutions").value = r.solutions;
+        this.ui.showDialog("recordEditDialog");
+      }
+
+      async saveTeacherRecord() {
+        try {
+          this.ui.loading(true, "학생 기록을 수정하는 중...");
+          await this.db.saveRecord({
+            student_number: $("#trNumber").value.trim(), student_name: $("#trName").value.trim(),
+            activity_date: $("#trDate").value, activity_title: $("#trTitle").value.trim(),
+            today_work: $("#trWork").value.trim(), difficulties: $("#trDifficulties").value.trim(),
+            solutions: $("#trSolutions").value.trim()
+          }, $("#trId").value);
+          this.ui.closeDialog("recordEditDialog");
+          await this.loadTeacherData(false);
+          this.ui.toast("학생 기록을 수정했습니다.", "success");
+        } catch (error) { this.ui.toast(this.friendlyError(error), "error"); }
+        finally { this.ui.loading(false); }
+      }
+
+      async removeRecord(id) {
+        const r = this.records.find(item => item.id === id);
+        if (!r || !this.ui.confirm(`${r.student_name} 학생의 “${r.activity_title}” 기록을 삭제할까요?\n이 작업은 되돌릴 수 없습니다.`)) return;
+        try {
+          this.ui.loading(true, "기록을 삭제하는 중...");
+          await this.db.deleteRecord(id);
+          await this.loadTeacherData(false);
+          this.ui.toast("학생 기록을 삭제했습니다.", "success");
+        } catch (error) { this.ui.toast(this.friendlyError(error), "error"); }
+        finally { this.ui.loading(false); }
+      }
+
+      async openQr(id) {
+        const p = this.projects.find(item => item.id === id);
+        if (!p) return;
+        this.currentQrProject = p;
+        const url = projectUrl(p.id);
+        $("#qrProjectName").textContent = p.project_name;
+        $("#qrProjectInfo").textContent = `${p.grade}학년 ${p.class}반 · ${p.lesson_number}차시`;
+        $("#qrProjectMeta").textContent = "학생이 스캔하면 이 프로젝트로 바로 접속합니다.";
+        $("#qrUrlText").textContent = url;
+        try {
+          await QRCode.toCanvas($("#qrCanvas"), url, { width: 280, margin: 2, color: { dark: "#10203a", light: "#ffffff" }, errorCorrectionLevel: "H" });
+          this.ui.showDialog("qrDialog");
+        } catch (error) { this.ui.toast("QR 생성에 실패했습니다.", "error"); }
+      }
+
+      downloadQr() {
+        if (!this.currentQrProject) return;
+        const source = $("#qrCanvas");
+        const canvas = document.createElement("canvas");
+        canvas.width = 700; canvas.height = 860;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#10203a"; ctx.textAlign = "center";
+        ctx.font = "700 34px sans-serif"; ctx.fillText(this.currentQrProject.project_name, 350, 62);
+        ctx.font = "22px sans-serif"; ctx.fillStyle = "#5d6b80";
+        ctx.fillText(`${this.currentQrProject.grade}학년 ${this.currentQrProject.class}반 · ${this.currentQrProject.lesson_number}차시`, 350, 102);
+        ctx.drawImage(source, 100, 140, 500, 500);
+        ctx.font = "700 22px sans-serif"; ctx.fillStyle = "#1565d8"; ctx.fillText("QR을 스캔해 오늘의 만들기를 기록하세요", 350, 700);
+        ctx.font = "15px sans-serif"; ctx.fillStyle = "#7c8798"; ctx.fillText("Makerlog · 메이커 포트폴리오", 350, 748);
+        const a = document.createElement("a");
+        a.download = `${this.currentQrProject.project_name}-QR.png`;
+        a.href = canvas.toDataURL("image/png"); a.click();
+      }
+
+      recordsWithProject(records) {
+        return records.map(r => ({ ...r, projects: r.projects || this.projects.find(p => p.id === r.project_id) }));
+      }
+
+      exportAll() {
+        try { this.excel.export(this.recordsWithProject(this.records), `메이커포트폴리오-전체-${todayLocal()}.xlsx`); }
+        catch (error) { this.ui.toast(this.friendlyError(error), "error"); }
+      }
+
+      exportProject() {
+        const p = this.projects.find(item => item.id === this.selectedProjectId);
+        if (!p) return this.ui.toast("프로젝트를 먼저 선택해 주세요.", "error");
+        try {
+          const records = this.recordsWithProject(this.records.filter(r => r.project_id === p.id));
+          this.excel.export(records, `${p.project_name}-${p.grade}학년${p.class}반-${todayLocal()}.xlsx`);
+        } catch (error) { this.ui.toast(this.friendlyError(error), "error"); }
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      window.makerlogApp = new MakerlogApp();
+    });
+  </script>
+</body>
+</html>
