@@ -183,6 +183,13 @@
     .empty-project .big-icon .material-symbols-rounded { font-size: 31px; }
     .empty-project h2 { margin: 0; font-size: 20px; }
     .empty-project p { margin: 6px auto 0; color: var(--muted); max-width: 400px; }
+    .student-project-picker {
+      width: min(560px, 100%); margin: 22px auto 0; padding: 17px;
+      text-align: left; background: var(--surface-2); border: 1px solid var(--border); border-radius: 17px;
+    }
+    .student-project-picker label { display: block; margin: 0 0 7px 2px; font-size: 13px; font-weight: 750; }
+    .student-project-picker .actions { margin-top: 11px; justify-content: stretch; }
+    .student-project-picker .actions .btn.primary { flex: 1; }
     .form-section { margin-top: 18px; }
     .section-kicker { color: var(--primary-strong); font-size: 12px; font-weight: 800; margin-bottom: 10px; }
     .form-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 15px; }
@@ -442,8 +449,19 @@
     <section class="view" id="studentView">
       <div id="studentNoProject" class="card empty-project">
         <div class="big-icon"><span class="material-symbols-rounded">qr_code_scanner</span></div>
-        <h2>프로젝트 QR을 스캔해 주세요</h2>
-        <p>교사가 공유한 QR코드로 접속하면 프로젝트명과 학년이 표시되고, 학생이 반과 차시를 입력합니다.</p>
+        <h2>공유 프로젝트를 선택해 주세요</h2>
+        <p>교사의 QR을 스캔하거나 아래 목록에서 프로젝트를 직접 선택할 수 있습니다.</p>
+        <div class="student-project-picker">
+          <label for="studentProjectSelect">교사가 공유한 QR 프로젝트</label>
+          <select class="control" id="studentProjectSelect" disabled>
+            <option value="">프로젝트를 불러오는 중...</option>
+          </select>
+          <div class="actions">
+            <button class="btn primary" id="openStudentProjectBtn" disabled><span class="material-symbols-rounded">arrow_forward</span>선택한 프로젝트 열기</button>
+            <button class="btn ghost" id="refreshStudentProjectsBtn" aria-label="프로젝트 목록 새로고침"><span class="material-symbols-rounded">refresh</span></button>
+          </div>
+          <p class="hint" id="studentProjectPickerStatus">Supabase에서 공유 프로젝트를 확인하고 있어요.</p>
+        </div>
       </div>
 
       <div id="studentWorkspace" class="hidden">
@@ -453,7 +471,10 @@
             <h2 id="studentProjectName">프로젝트</h2>
             <p id="studentProjectMeta">학년</p>
           </div>
-          <div class="lesson-chip"><span class="material-symbols-rounded">edit_note</span><small>반·차시<br>학생 입력</small></div>
+          <div style="display:grid;gap:9px;justify-items:end">
+            <div class="lesson-chip"><span class="material-symbols-rounded">edit_note</span><small>반·차시<br>학생 입력</small></div>
+            <button class="btn small" id="changeStudentProjectBtn" style="color:white;background:rgba(255,255,255,.17);border:1px solid rgba(255,255,255,.25)"><span class="material-symbols-rounded">swap_horiz</span>프로젝트 변경</button>
+          </div>
         </div>
 
         <div class="grid two form-section">
@@ -1109,6 +1130,7 @@ ${JSON.stringify(written, null, 2)}`);
       config = {};
       currentProject = null;
       projects = [];
+      publicProjects = [];
       records = [];
       studentRecords = [];
       editingStudentRecord = null;
@@ -1128,6 +1150,7 @@ ${JSON.stringify(written, null, 2)}`);
         const projectId = params.get("project");
         this.setMode(params.get("mode") === "teacher" ? "teacher" : "student");
         if (projectId) await this.loadStudentProject(projectId);
+        else await this.loadStudentProjectOptions();
         await this.restoreTeacherSession();
       }
 
@@ -1181,6 +1204,7 @@ ${JSON.stringify(written, null, 2)}`);
           setTimeout(() => this.restoreTeacherSession(), 0);
           const projectId = new URLSearchParams(location.search).get("project");
           if (projectId) setTimeout(() => this.loadStudentProject(projectId), 0);
+          else setTimeout(() => this.loadStudentProjectOptions(), 0);
         }
       }
 
@@ -1203,6 +1227,12 @@ ${JSON.stringify(written, null, 2)}`);
         $("#photoInput").addEventListener("change", e => this.previewPhoto(e.target.files?.[0]));
         $("#portfolioForm").addEventListener("submit", e => { e.preventDefault(); this.saveStudentRecord(); });
         $("#loadHistoryBtn").addEventListener("click", () => this.loadStudentHistory());
+        $("#studentProjectSelect").addEventListener("change", () => {
+          $("#openStudentProjectBtn").disabled = !$("#studentProjectSelect").value;
+        });
+        $("#openStudentProjectBtn").addEventListener("click", () => this.openSelectedStudentProject());
+        $("#refreshStudentProjectsBtn").addEventListener("click", () => this.loadStudentProjectOptions());
+        $("#changeStudentProjectBtn").addEventListener("click", () => this.showStudentProjectPicker());
         $("#aiPolishBtn").addEventListener("click", () => this.runAiWorkflow());
         $("#keepOriginalBtn").addEventListener("click", () => { this.ui.closeDialog("aiResultDialog"); this.ui.toast("원본을 유지합니다."); });
         $("#applyAiBtn").addEventListener("click", () => this.applyAiResult());
@@ -1279,6 +1309,63 @@ ${JSON.stringify(written, null, 2)}`);
           difficulties: $("#difficulties").value.trim(),
           solutions: $("#solutions").value.trim()
         };
+      }
+
+      async loadStudentProjectOptions() {
+        const select = $("#studentProjectSelect");
+        if (!this.db.client) {
+          select.innerHTML = `<option value="">Supabase 연결이 필요합니다</option>`;
+          select.disabled = true;
+          $("#openStudentProjectBtn").disabled = true;
+          $("#studentProjectPickerStatus").textContent = "상단 설정에서 Supabase 연결 정보를 확인해 주세요.";
+          return;
+        }
+        try {
+          select.disabled = true;
+          $("#openStudentProjectBtn").disabled = true;
+          select.innerHTML = `<option value="">프로젝트를 불러오는 중...</option>`;
+          $("#studentProjectPickerStatus").textContent = "공유 프로젝트를 확인하고 있어요.";
+          this.publicProjects = await this.db.getProjects();
+          if (!this.publicProjects.length) {
+            select.innerHTML = `<option value="">아직 공유된 프로젝트가 없습니다</option>`;
+            $("#studentProjectPickerStatus").textContent = "교사가 프로젝트를 만들면 이곳에 표시됩니다.";
+            return;
+          }
+          select.innerHTML = `<option value="">프로젝트를 선택하세요</option>` + this.publicProjects.map(p =>
+            `<option value="${p.id}">${escapeHtml(p.grade)}학년 · ${escapeHtml(p.project_name)}</option>`
+          ).join("");
+          select.disabled = false;
+          $("#studentProjectPickerStatus").textContent = `${this.publicProjects.length}개의 공유 프로젝트가 있습니다.`;
+        } catch (error) {
+          select.innerHTML = `<option value="">프로젝트를 불러오지 못했습니다</option>`;
+          $("#studentProjectPickerStatus").textContent = this.friendlyError(error);
+          this.notifyDatabaseError(error);
+        }
+      }
+
+      async openSelectedStudentProject() {
+        const id = $("#studentProjectSelect").value;
+        if (!id) return this.ui.toast("프로젝트를 먼저 선택해 주세요.", "error");
+        const url = new URL(location.href);
+        url.search = "";
+        url.searchParams.set("project", id);
+        url.searchParams.set("mode", "student");
+        history.pushState({}, "", url);
+        await this.loadStudentProject(id);
+      }
+
+      async showStudentProjectPicker() {
+        this.currentProject = null;
+        const url = new URL(location.href);
+        url.search = "";
+        history.pushState({}, "", url);
+        $("#studentWorkspace").classList.add("hidden");
+        $("#studentNoProject").classList.remove("hidden");
+        $("#studentNoProject h2").textContent = "공유 프로젝트를 선택해 주세요";
+        $("#studentNoProject > p").textContent = "교사의 QR을 스캔하거나 아래 목록에서 프로젝트를 직접 선택할 수 있습니다.";
+        document.title = "Makerlog — 메이커 포트폴리오";
+        await this.loadStudentProjectOptions();
+        $("#studentNoProject").scrollIntoView({ behavior: "smooth", block: "start" });
       }
 
       async loadStudentProject(id) {
