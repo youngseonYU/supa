@@ -443,7 +443,7 @@
       <div id="studentNoProject" class="card empty-project">
         <div class="big-icon"><span class="material-symbols-rounded">qr_code_scanner</span></div>
         <h2>프로젝트 QR을 스캔해 주세요</h2>
-        <p>교사가 공유한 QR코드로 접속하면 프로젝트명과 차시가 자동으로 표시됩니다.</p>
+        <p>교사가 공유한 QR코드로 접속하면 프로젝트명과 학년이 표시되고, 학생이 반과 차시를 입력합니다.</p>
       </div>
 
       <div id="studentWorkspace" class="hidden">
@@ -451,9 +451,9 @@
           <div>
             <div class="label">현재 프로젝트</div>
             <h2 id="studentProjectName">프로젝트</h2>
-            <p id="studentProjectMeta">학년 · 반</p>
+            <p id="studentProjectMeta">학년</p>
           </div>
-          <div class="lesson-chip"><span id="studentLesson">1</span><small>차시</small></div>
+          <div class="lesson-chip"><span class="material-symbols-rounded">edit_note</span><small>반·차시<br>학생 입력</small></div>
         </div>
 
         <div class="grid two form-section">
@@ -464,6 +464,8 @@
             <div class="form-grid" style="margin-top:16px">
               <div class="field half"><label for="studentNumber">학번 <span class="req">*</span></label><input class="control" id="studentNumber" inputmode="numeric" maxlength="20" placeholder="예: 20301" /></div>
               <div class="field half"><label for="studentName">이름 <span class="req">*</span></label><input class="control" id="studentName" maxlength="30" placeholder="이름" /></div>
+              <div class="field half"><label for="studentClass">반 <span class="req">*</span></label><input class="control" id="studentClass" inputmode="numeric" maxlength="10" placeholder="예: 3" /></div>
+              <div class="field half"><label for="studentLesson">차시 <span class="req">*</span></label><input class="control" id="studentLesson" type="number" inputmode="numeric" min="1" max="100" placeholder="예: 4" /></div>
               <div class="field"><button class="btn secondary" id="loadHistoryBtn" style="width:100%"><span class="material-symbols-rounded">history</span>내 이전 기록 보기</button></div>
             </div>
           </section>
@@ -560,16 +562,14 @@
         <div class="grid two">
           <section class="card">
             <div class="section-head">
-              <div><h2 id="projectFormTitle">새 프로젝트</h2><p>생성 즉시 학생용 QR이 만들어집니다.</p></div>
+              <div><h2 id="projectFormTitle">새 프로젝트</h2><p>학년과 프로젝트명만 정하면 QR이 만들어집니다.</p></div>
               <span class="material-symbols-rounded" style="color:var(--primary)">add_box</span>
             </div>
             <form id="projectForm">
               <input type="hidden" id="editingProjectId" />
               <div class="form-grid" style="margin-top:17px">
-                <div class="field third"><label for="projectGrade">학년</label><select class="control" id="projectGrade" required><option value="">선택</option><option>1</option><option>2</option><option>3</option></select></div>
-                <div class="field third"><label for="projectClass">반</label><input class="control" id="projectClass" required inputmode="numeric" placeholder="예: 3" /></div>
-                <div class="field third"><label for="projectLesson">차시</label><input class="control" id="projectLesson" required inputmode="numeric" min="1" placeholder="예: 4" /></div>
-                <div class="field"><label for="projectName">프로젝트명</label><input class="control" id="projectName" required maxlength="100" placeholder="예: 골드버그 장치 만들기" /></div>
+                <div class="field half"><label for="projectGrade">학년</label><select class="control" id="projectGrade" required><option value="">선택</option><option>1</option><option>2</option><option>3</option></select></div>
+                <div class="field half"><label for="projectName">프로젝트명</label><input class="control" id="projectName" required maxlength="100" placeholder="예: 골드버그 장치 만들기" /></div>
               </div>
               <div class="actions">
                 <button class="btn ghost hidden" type="button" id="cancelProjectEditBtn">취소</button>
@@ -632,6 +632,8 @@
         <div class="form-grid">
           <div class="field half"><label for="trNumber">학번</label><input class="control" id="trNumber" required /></div>
           <div class="field half"><label for="trName">이름</label><input class="control" id="trName" required /></div>
+          <div class="field half"><label for="trClass">반</label><input class="control" id="trClass" required /></div>
+          <div class="field half"><label for="trLesson">차시</label><input class="control" id="trLesson" type="number" min="1" required /></div>
           <div class="field half"><label for="trDate">날짜</label><input class="control" id="trDate" type="date" required /></div>
           <div class="field"><label for="trTitle">활동 제목</label><input class="control" id="trTitle" required /></div>
           <div class="field"><label for="trWork">오늘 한 일</label><textarea class="control" id="trWork" required></textarea></div>
@@ -678,8 +680,8 @@
      * TypeScript-style JSDoc types and service classes keep this plain JavaScript maintainable.
      */
 
-    /** @typedef {{id:string,grade:string|number,class:string|number,project_name:string,lesson_number:string|number,qr_url:string,created_at:string}} Project */
-    /** @typedef {{id:string,project_id:string,student_number:string,student_name:string,activity_date:string,photo_url:string,activity_title:string,today_work:string,difficulties:string,solutions:string,created_at:string,updated_at:string,projects?:Project}} Portfolio */
+    /** @typedef {{id:string,grade:string|number,project_name:string,qr_url:string,created_at:string}} Project */
+    /** @typedef {{id:string,project_id:string,student_number:string,student_name:string,student_class:string,lesson_number:string|number,activity_date:string,photo_url:string,activity_title:string,today_work:string,difficulties:string,solutions:string,created_at:string,updated_at:string,projects?:Project}} Portfolio */
 
     const SQL_SETUP = `-- Makerlog / 메이커 포트폴리오 Supabase 초기 설정
 -- Supabase Dashboard > SQL Editor에서 전체를 한 번 실행하세요.
@@ -689,9 +691,9 @@ create extension if not exists pgcrypto;
 create table if not exists public.projects (
   id uuid primary key default gen_random_uuid(),
   grade text not null,
-  class text not null,
+  class text,
   project_name text not null check (char_length(project_name) between 1 and 100),
-  lesson_number integer not null check (lesson_number > 0),
+  lesson_number integer check (lesson_number > 0),
   qr_url text not null default '',
   created_at timestamptz not null default now()
 );
@@ -701,6 +703,8 @@ create table if not exists public.portfolio (
   project_id uuid not null references public.projects(id) on delete cascade,
   student_number text not null,
   student_name text not null,
+  student_class text not null,
+  lesson_number integer not null check (lesson_number > 0),
   activity_date date not null default current_date,
   photo_url text not null,
   activity_title text not null,
@@ -710,6 +714,23 @@ create table if not exists public.portfolio (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- 기존 버전에서 업그레이드할 때 필요한 안전한 마이그레이션
+alter table public.projects add column if not exists class text;
+alter table public.projects add column if not exists lesson_number integer;
+alter table public.projects alter column class drop not null;
+alter table public.projects alter column lesson_number drop not null;
+alter table public.portfolio add column if not exists student_class text;
+alter table public.portfolio add column if not exists lesson_number integer;
+
+-- 기존 기록이 있다면 예전 프로젝트의 반·차시 값을 학생 기록으로 옮김
+update public.portfolio as po
+set
+  student_class = coalesce(po.student_class, p.class),
+  lesson_number = coalesce(po.lesson_number, p.lesson_number)
+from public.projects as p
+where po.project_id = p.id
+  and (po.student_class is null or po.lesson_number is null);
 
 create index if not exists portfolio_project_id_idx on public.portfolio(project_id);
 create index if not exists portfolio_student_idx on public.portfolio(project_id, student_number, student_name);
@@ -1059,9 +1080,9 @@ ${JSON.stringify(written, null, 2)}`);
         if (!records.length) throw new Error("다운로드할 기록이 없습니다.");
         const rows = records.map(r => ({
           "학년": r.projects?.grade ?? "",
-          "반": r.projects?.class ?? "",
+          "반": r.student_class ?? "",
           "프로젝트명": r.projects?.project_name ?? "",
-          "차시": r.projects?.lesson_number ?? "",
+          "차시": r.lesson_number ?? "",
           "학번": r.student_number,
           "이름": r.student_name,
           "날짜": r.activity_date,
@@ -1218,14 +1239,24 @@ ${JSON.stringify(written, null, 2)}`);
         const message = error?.message || String(error);
         if (/Failed to fetch/i.test(message)) return "서버에 연결하지 못했습니다. 인터넷과 설정값을 확인해 주세요.";
         if (/Invalid API key|API_KEY_INVALID/i.test(message)) return "API Key가 올바르지 않습니다.";
-        if (/relation .* does not exist/i.test(message)) return "Supabase 테이블이 없습니다. 설치 안내의 SQL을 먼저 실행해 주세요.";
+        if (/relation .* does not exist|could not find the table|schema cache/i.test(message)) return "Supabase 테이블이 없습니다. 설치 안내의 최신 SQL을 먼저 실행해 주세요.";
         if (/row-level security/i.test(message)) return "저장 권한이 없습니다. Supabase SQL 정책을 확인해 주세요.";
         return message;
       }
 
+      notifyDatabaseError(error) {
+        const raw = error?.message || String(error);
+        this.ui.toast(this.friendlyError(error), "error");
+        if (/relation .* does not exist|could not find the table|schema cache/i.test(raw)) {
+          this.setSetupTab("sql");
+          this.ui.showDialog("setupDialog");
+        }
+      }
+
       validateStudentForm(includePhoto = true) {
         const required = [
-          ["#studentNumber", "학번"], ["#studentName", "이름"], ["#activityDate", "날짜"],
+          ["#studentNumber", "학번"], ["#studentName", "이름"], ["#studentClass", "반"],
+          ["#studentLesson", "차시"], ["#activityDate", "날짜"],
           ["#activityTitle", "활동 제목"], ["#todayWork", "오늘 한 일"],
           ["#difficulties", "어려웠던 점"], ["#solutions", "해결한 점"]
         ];
@@ -1262,8 +1293,7 @@ ${JSON.stringify(written, null, 2)}`);
           $("#studentNoProject").classList.add("hidden");
           $("#studentWorkspace").classList.remove("hidden");
           $("#studentProjectName").textContent = this.currentProject.project_name;
-          $("#studentProjectMeta").textContent = `${this.currentProject.grade}학년 ${this.currentProject.class}반`;
-          $("#studentLesson").textContent = this.currentProject.lesson_number;
+          $("#studentProjectMeta").textContent = `${this.currentProject.grade}학년 · 반과 차시는 학생이 입력해요`;
           document.title = `${this.currentProject.project_name} · Makerlog`;
         } catch (error) {
           this.ui.toast(this.friendlyError(error), "error");
@@ -1293,6 +1323,8 @@ ${JSON.stringify(written, null, 2)}`);
             project_id: this.currentProject.id,
             student_number: $("#studentNumber").value.trim(),
             student_name: $("#studentName").value.trim(),
+            student_class: $("#studentClass").value.trim(),
+            lesson_number: Number($("#studentLesson").value),
             activity_date: $("#activityDate").value,
             photo_url: photoUrl,
             ...this.getTextFields()
@@ -1314,7 +1346,7 @@ ${JSON.stringify(written, null, 2)}`);
           if (showLoading) this.ui.loading(true, "이전 기록을 찾는 중...");
           this.studentRecords = await this.db.getStudentRecords(this.currentProject.id, number, name);
           this.renderStudentHistory();
-        } catch (error) { this.ui.toast(this.friendlyError(error), "error"); }
+        } catch (error) { this.notifyDatabaseError(error); }
         finally { if (showLoading) this.ui.loading(false); }
       }
 
@@ -1327,7 +1359,7 @@ ${JSON.stringify(written, null, 2)}`);
         $("#studentHistory").innerHTML = this.studentRecords.map(r => `
           <article class="record-item">
             ${r.photo_url ? `<img class="record-thumb" src="${escapeHtml(r.photo_url)}" alt="" loading="lazy">` : `<div class="record-thumb record-placeholder"><span class="material-symbols-rounded">image</span></div>`}
-            <div class="record-copy"><strong>${escapeHtml(r.activity_title)}</strong><small>${escapeHtml(r.activity_date)} · ${escapeHtml(r.today_work)}</small></div>
+            <div class="record-copy"><strong>${escapeHtml(r.activity_title)}</strong><small>${escapeHtml(r.student_class || "-")}반 · ${escapeHtml(r.lesson_number || "-")}차시 · ${escapeHtml(r.activity_date)}</small></div>
             <div class="actions"><button class="btn ghost small" data-student-edit="${r.id}"><span class="material-symbols-rounded">edit</span>수정</button></div>
           </article>`).join("");
         $$("[data-student-edit]").forEach(btn => btn.addEventListener("click", () => this.editStudentRecord(btn.dataset.studentEdit)));
@@ -1337,6 +1369,8 @@ ${JSON.stringify(written, null, 2)}`);
         const r = this.studentRecords.find(item => item.id === id);
         if (!r) return;
         this.editingStudentRecord = r;
+        $("#studentClass").value = r.student_class || "";
+        $("#studentLesson").value = r.lesson_number || "";
         $("#activityDate").value = r.activity_date;
         $("#activityTitle").value = r.activity_title;
         $("#todayWork").value = r.today_work;
@@ -1443,7 +1477,7 @@ ${JSON.stringify(written, null, 2)}`);
           $("#loginForm").reset();
           await this.loadTeacherData();
           this.ui.toast("교사로 로그인했습니다.", "success");
-        } catch (error) { this.ui.toast(this.friendlyError(error), "error"); }
+        } catch (error) { this.notifyDatabaseError(error); }
         finally { this.ui.loading(false); }
       }
 
@@ -1461,7 +1495,7 @@ ${JSON.stringify(written, null, 2)}`);
           if (showLoading) this.ui.loading(true, "수업 데이터를 불러오는 중...");
           [this.projects, this.records] = await Promise.all([this.db.getProjects(), this.db.getAllRecords()]);
           this.renderProjects(); this.renderRecords(); this.renderStats();
-        } catch (error) { this.ui.toast(this.friendlyError(error), "error"); }
+        } catch (error) { this.notifyDatabaseError(error); }
         finally { if (showLoading) this.ui.loading(false); }
       }
 
@@ -1476,9 +1510,7 @@ ${JSON.stringify(written, null, 2)}`);
           const id = $("#editingProjectId").value;
           const values = {
             grade: $("#projectGrade").value,
-            class: $("#projectClass").value.trim(),
             project_name: $("#projectName").value.trim(),
-            lesson_number: Number($("#projectLesson").value),
             qr_url: id ? (this.projects.find(p => p.id === id)?.qr_url || projectUrl(id)) : ""
           };
           this.ui.loading(true, id ? "프로젝트 수정 중..." : "프로젝트 생성 중...");
@@ -1488,7 +1520,7 @@ ${JSON.stringify(written, null, 2)}`);
           await this.loadTeacherData(false);
           this.ui.toast(id ? "프로젝트를 수정했습니다." : "프로젝트와 QR을 만들었습니다.", "success");
           if (!id) this.openQr(saved.id);
-        } catch (error) { this.ui.toast(this.friendlyError(error), "error"); }
+        } catch (error) { this.notifyDatabaseError(error); }
         finally { this.ui.loading(false); }
       }
 
@@ -1504,8 +1536,6 @@ ${JSON.stringify(written, null, 2)}`);
         if (!p) return;
         $("#editingProjectId").value = p.id;
         $("#projectGrade").value = p.grade;
-        $("#projectClass").value = p.class;
-        $("#projectLesson").value = p.lesson_number;
         $("#projectName").value = p.project_name;
         $("#projectFormTitle").textContent = "프로젝트 수정";
         $("#projectSubmitText").textContent = "수정 저장";
@@ -1528,11 +1558,11 @@ ${JSON.stringify(written, null, 2)}`);
 
       renderProjects() {
         const query = $("#projectSearch").value.trim().toLowerCase();
-        const list = this.projects.filter(p => `${p.project_name} ${p.grade} ${p.class} ${p.lesson_number}`.toLowerCase().includes(query));
+        const list = this.projects.filter(p => `${p.project_name} ${p.grade}`.toLowerCase().includes(query));
         if (!list.length) { $("#projectList").innerHTML = `<div class="empty-state">${query ? "검색 결과가 없습니다." : "프로젝트를 만들어 보세요."}</div>`; return; }
         $("#projectList").innerHTML = list.map(p => `
           <article class="project-card ${p.id === this.selectedProjectId ? "active" : ""}">
-            <div class="project-card-top"><div><h3>${escapeHtml(p.project_name)}</h3><p>${escapeHtml(p.grade)}학년 ${escapeHtml(p.class)}반 · ${escapeHtml(p.lesson_number)}차시</p></div><span class="chip">${this.records.filter(r => r.project_id === p.id).length}건</span></div>
+            <div class="project-card-top"><div><h3>${escapeHtml(p.project_name)}</h3><p>${escapeHtml(p.grade)}학년 · 반과 차시는 학생 입력</p></div><span class="chip">${this.records.filter(r => r.project_id === p.id).length}건</span></div>
             <div class="actions">
               <button class="btn primary small" data-select-project="${p.id}"><span class="material-symbols-rounded">list_alt</span>기록</button>
               <button class="btn secondary small" data-qr-project="${p.id}"><span class="material-symbols-rounded">qr_code_2</span>QR</button>
@@ -1552,7 +1582,7 @@ ${JSON.stringify(written, null, 2)}`);
         $("#exportProjectBtn").disabled = false;
         const p = this.projects.find(item => item.id === id);
         $("#recordsTitle").textContent = p ? p.project_name : "학생 기록";
-        $("#recordsSubtitle").textContent = p ? `${p.grade}학년 ${p.class}반 · ${p.lesson_number}차시` : "";
+        $("#recordsSubtitle").textContent = p ? `${p.grade}학년 · 학생별 반·차시 기록` : "";
         $("#recordsTitle").scrollIntoView({ behavior: "smooth", block: "center" });
       }
 
@@ -1572,7 +1602,7 @@ ${JSON.stringify(written, null, 2)}`);
         $("#recordsBody").innerHTML = list.map(r => `
           <tr>
             <td>${r.photo_url ? `<a href="${escapeHtml(r.photo_url)}" target="_blank" rel="noopener"><img class="table-photo" src="${escapeHtml(r.photo_url)}" alt="활동 사진" loading="lazy"></a>` : "-"}</td>
-            <td><strong>${escapeHtml(r.student_name)}</strong><br><span style="color:var(--muted)">${escapeHtml(r.student_number)}</span></td>
+            <td><strong>${escapeHtml(r.student_name)}</strong><br><span style="color:var(--muted)">${escapeHtml(r.student_number)} · ${escapeHtml(r.student_class || "-")}반 · ${escapeHtml(r.lesson_number || "-")}차시</span></td>
             <td>${escapeHtml(r.activity_date)}</td>
             <td><div class="cell-text"><strong>${escapeHtml(r.activity_title)}</strong></div></td>
             <td><div class="cell-text">${escapeHtml(r.today_work)}</div></td>
@@ -1587,6 +1617,7 @@ ${JSON.stringify(written, null, 2)}`);
         const r = this.records.find(item => item.id === id);
         if (!r) return;
         $("#trId").value = r.id; $("#trNumber").value = r.student_number; $("#trName").value = r.student_name;
+        $("#trClass").value = r.student_class || ""; $("#trLesson").value = r.lesson_number || "";
         $("#trDate").value = r.activity_date; $("#trTitle").value = r.activity_title; $("#trWork").value = r.today_work;
         $("#trDifficulties").value = r.difficulties; $("#trSolutions").value = r.solutions;
         this.ui.showDialog("recordEditDialog");
@@ -1597,6 +1628,7 @@ ${JSON.stringify(written, null, 2)}`);
           this.ui.loading(true, "학생 기록을 수정하는 중...");
           await this.db.saveRecord({
             student_number: $("#trNumber").value.trim(), student_name: $("#trName").value.trim(),
+            student_class: $("#trClass").value.trim(), lesson_number: Number($("#trLesson").value),
             activity_date: $("#trDate").value, activity_title: $("#trTitle").value.trim(),
             today_work: $("#trWork").value.trim(), difficulties: $("#trDifficulties").value.trim(),
             solutions: $("#trSolutions").value.trim()
@@ -1626,7 +1658,7 @@ ${JSON.stringify(written, null, 2)}`);
         this.currentQrProject = p;
         const url = projectUrl(p.id);
         $("#qrProjectName").textContent = p.project_name;
-        $("#qrProjectInfo").textContent = `${p.grade}학년 ${p.class}반 · ${p.lesson_number}차시`;
+        $("#qrProjectInfo").textContent = `${p.grade}학년 · 반과 차시는 학생이 입력`;
         $("#qrProjectMeta").textContent = "학생이 스캔하면 이 프로젝트로 바로 접속합니다.";
         $("#qrUrlText").textContent = url;
         try {
@@ -1645,7 +1677,7 @@ ${JSON.stringify(written, null, 2)}`);
         ctx.fillStyle = "#10203a"; ctx.textAlign = "center";
         ctx.font = "700 34px sans-serif"; ctx.fillText(this.currentQrProject.project_name, 350, 62);
         ctx.font = "22px sans-serif"; ctx.fillStyle = "#5d6b80";
-        ctx.fillText(`${this.currentQrProject.grade}학년 ${this.currentQrProject.class}반 · ${this.currentQrProject.lesson_number}차시`, 350, 102);
+        ctx.fillText(`${this.currentQrProject.grade}학년 · 반과 차시는 학생이 입력`, 350, 102);
         ctx.drawImage(source, 100, 140, 500, 500);
         ctx.font = "700 22px sans-serif"; ctx.fillStyle = "#1565d8"; ctx.fillText("QR을 스캔해 오늘의 만들기를 기록하세요", 350, 700);
         ctx.font = "15px sans-serif"; ctx.fillStyle = "#7c8798"; ctx.fillText("Makerlog · 메이커 포트폴리오", 350, 748);
@@ -1668,7 +1700,7 @@ ${JSON.stringify(written, null, 2)}`);
         if (!p) return this.ui.toast("프로젝트를 먼저 선택해 주세요.", "error");
         try {
           const records = this.recordsWithProject(this.records.filter(r => r.project_id === p.id));
-          this.excel.export(records, `${p.project_name}-${p.grade}학년${p.class}반-${todayLocal()}.xlsx`);
+          this.excel.export(records, `${p.project_name}-${p.grade}학년-${todayLocal()}.xlsx`);
         } catch (error) { this.ui.toast(this.friendlyError(error), "error"); }
       }
     }
