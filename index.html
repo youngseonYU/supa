@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0&family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     :root {
@@ -618,7 +618,7 @@
     <div class="modal-head"><div><h2>학생 접속 QR</h2><p id="qrProjectMeta" style="margin:4px 0 0;color:var(--muted);font-size:13px"></p></div><button class="icon-btn" data-close-dialog="qrDialog" aria-label="닫기"><span class="material-symbols-rounded">close</span></button></div>
     <div class="modal-body" id="qrPrintArea" style="text-align:center">
       <h2 id="qrProjectName" style="margin:0 0 4px"></h2><p id="qrProjectInfo" style="margin:0 0 16px;color:var(--muted)"></p>
-      <canvas id="qrCanvas" width="280" height="280" style="max-width:100%;border-radius:14px"></canvas>
+      <div id="qrCanvas" style="width:280px;height:280px;max-width:100%;margin:0 auto;border-radius:14px;overflow:hidden"></div>
       <p id="qrUrlText" style="font-size:11px;color:var(--muted);word-break:break-all"></p>
     </div>
     <div class="modal-foot"><button class="btn ghost" id="printQrBtn"><span class="material-symbols-rounded">print</span>인쇄</button><button class="btn primary" id="downloadQrBtn"><span class="material-symbols-rounded">download</span>PNG 다운로드</button></div>
@@ -1662,14 +1662,29 @@ ${JSON.stringify(written, null, 2)}`);
         $("#qrProjectMeta").textContent = "학생이 스캔하면 이 프로젝트로 바로 접속합니다.";
         $("#qrUrlText").textContent = url;
         try {
-          await QRCode.toCanvas($("#qrCanvas"), url, { width: 280, margin: 2, color: { dark: "#10203a", light: "#ffffff" }, errorCorrectionLevel: "H" });
+          if (!window.QRCode) throw new Error("QR 라이브러리를 불러오지 못했습니다.");
+          const container = $("#qrCanvas");
+          container.innerHTML = "";
+          new QRCode(container, {
+            text: url,
+            width: 280,
+            height: 280,
+            colorDark: "#10203a",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+          });
+          if (!container.querySelector("canvas")) throw new Error("QR 이미지를 만들지 못했습니다.");
           this.ui.showDialog("qrDialog");
-        } catch (error) { this.ui.toast("QR 생성에 실패했습니다.", "error"); }
+        } catch (error) {
+          console.error(error);
+          this.ui.toast(error?.message || "QR 생성에 실패했습니다.", "error");
+        }
       }
 
       downloadQr() {
         if (!this.currentQrProject) return;
-        const source = $("#qrCanvas");
+        const source = $("#qrCanvas canvas");
+        if (!source) return this.ui.toast("먼저 QR을 생성해 주세요.", "error");
         const canvas = document.createElement("canvas");
         canvas.width = 700; canvas.height = 860;
         const ctx = canvas.getContext("2d");
