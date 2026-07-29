@@ -898,10 +898,22 @@ using (bucket_id = 'portfolio-photos');`;
 
     class ConfigService {
       static KEY = "makerlog_config_v1";
+      static DEFAULTS = Object.freeze({
+        geminiKey: "",
+        geminiModel: "gemini-3.5-flash-lite",
+        supabaseUrl: "https://pytghuzzqwsaqhouwoke.supabase.co",
+        supabaseKey: "sb_publishable_Gh51I_alyPJN6QKQg-nKTw_2ftMwjHM"
+      });
       load() {
         try {
-          return JSON.parse(localStorage.getItem(ConfigService.KEY) || "{}");
-        } catch { return {}; }
+          const saved = JSON.parse(localStorage.getItem(ConfigService.KEY) || "{}");
+          return {
+            geminiKey: saved.geminiKey || ConfigService.DEFAULTS.geminiKey,
+            geminiModel: saved.geminiModel || ConfigService.DEFAULTS.geminiModel,
+            supabaseUrl: saved.supabaseUrl || ConfigService.DEFAULTS.supabaseUrl,
+            supabaseKey: saved.supabaseKey || ConfigService.DEFAULTS.supabaseKey
+          };
+        } catch { return { ...ConfigService.DEFAULTS }; }
       }
       save(config) { localStorage.setItem(ConfigService.KEY, JSON.stringify(config)); }
     }
