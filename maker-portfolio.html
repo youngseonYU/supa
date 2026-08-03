@@ -1053,7 +1053,7 @@ Supabase URL, Supabase Anon Key와 모델은 브라우저 LocalStorage에 저장
           throw new Error("HTML 파일을 직접 열었을 때는 Gemini API Key가 필요합니다. 배포 사이트에서는 입력 없이 사용할 수 있습니다.");
         }
         const endpoint = directKey
-          ? `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(directKey)}`
+          ? `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`
           : "/api/gemini";
         const requestBody = directKey
           ? {
@@ -1067,7 +1067,10 @@ Supabase URL, Supabase Anon Key와 모델은 브라우저 LocalStorage에 저장
         try {
           response = await fetch(endpoint, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              ...(directKey ? { "x-goog-api-key": directKey } : {})
+            },
             signal: controller.signal,
             body: JSON.stringify(requestBody)
           });
